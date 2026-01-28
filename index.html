@@ -21,179 +21,150 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-input { transition: all 0.2s ease; border: 1px solid #e5e7eb; }
-        .custom-input:focus { border-color: #0033CC; box-shadow: 0 0 0 3px rgba(0, 51, 204, 0.1); }
-        .modal-bg { background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-input { transition: all 0.2s ease; border: 1px solid #e5e7eb; outline: none; }
+        .custom-input:focus { border-color: #0033CC; ring: 2px; ring-color: rgba(0, 51, 204, 0.1); }
+        .modal-bg { background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-brand-gray text-brand-navy flex flex-col min-h-screen">
 
-    <!-- MODAL: CONFIG -->
-    <div id="configModal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4 fade-in">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+    <!-- CONFIG API -->
+    <div id="configModal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl fade-in">
             <h3 class="text-lg font-black mb-4 uppercase">Configuração API</h3>
-            <textarea id="apiUrlInput" rows="3" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-xs mb-4 outline-none" placeholder="Link do Script..."></textarea>
-            <button onclick="saveConfig()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar</button>
+            <textarea id="apiUrlInput" rows="3" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-xs mb-4" placeholder="Cole o link do Google Script aqui..."></textarea>
+            <button onclick="saveConfig()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar Configuração</button>
         </div>
     </div>
 
-    <!-- MODAL: EDITAR -->
-    <div id="editModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black uppercase tracking-tight">Editar Registro</h3>
-                <button onclick="closeModal('editModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <form id="editForm" class="space-y-4">
-                <input type="hidden" id="editId">
-                <input type="text" id="editName" placeholder="Cliente" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="editAmount" step="0.01" placeholder="Principal" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
-                    <input type="number" id="editRate" step="0.1" placeholder="Taxa %" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="editStart" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
-                    <input type="date" id="editPay" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
-                </div>
-                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: BAIXA -->
-    <div id="partialModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative flex flex-col">
+    <!-- MODAL: PAGAMENTO -->
+    <div id="partialModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl fade-in relative">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-black uppercase tracking-tight">Pagamento</h3>
+                <h3 class="text-lg font-black uppercase tracking-tight">Registrar Pagamento</h3>
                 <button onclick="closeModal('partialModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             
-            <div class="overflow-y-auto custom-scrollbar pr-1">
-                <div class="bg-blue-50 p-4 rounded-xl mb-4 text-center">
-                    <p class="text-[10px] text-blue-800 uppercase font-bold mb-1">Saldo Devedor Atual</p>
-                    <p id="partialCurrentDebt" class="text-2xl font-black text-brand-blue">R$ 0,00</p>
-                    <div id="partialInterestBadge" class="inline-block mt-2 px-3 py-1 bg-white rounded-full text-[9px] font-black text-blue-600 border border-blue-100 uppercase italic">Aguardando cálculo...</div>
-                </div>
-                <div class="mb-4">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1 italic">Histórico</p>
-                    <div id="historyList" class="space-y-2 max-h-32 overflow-y-auto"></div>
-                </div>
-                <form id="partialForm" class="space-y-4">
-                    <input type="hidden" id="partialId">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Data</label>
-                            <input type="date" id="partialDate" required class="custom-input w-full px-2 py-3 rounded-xl bg-gray-50 text-xs font-bold">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Valor R$</label>
-                            <input type="number" id="partialAmount" step="0.01" placeholder="0,00" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 cursor-pointer" onclick="document.getElementById('partialAmortize').click()">
-                        <input type="checkbox" id="partialAmortize" class="w-6 h-6 accent-brand-blue cursor-pointer" onclick="event.stopPropagation()">
-                        <div>
-                            <span class="text-xs font-bold block text-brand-black">Abater do Principal?</span>
-                            <span class="text-[9px] text-gray-400 uppercase leading-none">Desmarcado: Quita os juros acumulados primeiro</span>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Confirmar Baixa</button>
-                </form>
+            <div class="bg-blue-50 p-5 rounded-2xl mb-4 text-center">
+                <p class="text-[10px] text-blue-800 uppercase font-black mb-1 opacity-60">Dívida Principal</p>
+                <p id="partialCurrentDebt" class="text-3xl font-black text-brand-blue tracking-tighter">R$ 0,00</p>
+                <div id="partialInterestBadge" class="mt-2 inline-block px-3 py-1 bg-white rounded-full text-[10px] font-black text-blue-600 border border-blue-100 uppercase italic">Calculando...</div>
             </div>
+
+            <form id="partialForm" class="space-y-4">
+                <input type="hidden" id="partialId">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Data</label>
+                        <input type="date" id="partialDate" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Valor Pago</label>
+                        <input type="number" id="partialAmount" step="0.01" placeholder="0,00" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 cursor-pointer" onclick="document.getElementById('partialAmortize').click()">
+                    <input type="checkbox" id="partialAmortize" class="w-5 h-5 accent-brand-blue cursor-pointer" onclick="event.stopPropagation()">
+                    <div class="leading-tight">
+                        <span class="text-xs font-black block">Abater do Principal?</span>
+                        <span class="text-[9px] text-gray-400 uppercase font-bold">Direto na dívida principal</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-blue-100">Confirmar Recebimento</button>
+            </form>
         </div>
     </div>
 
-    <!-- TELA LOGIN -->
+    <!-- LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[200] flex items-center justify-center p-6 text-center">
         <div class="w-full max-w-sm">
-            <h1 class="text-4xl font-black text-white mb-10 tracking-tighter uppercase italic">Controle Boldt</h1>
+            <h1 class="text-4xl font-black text-white mb-12 tracking-tighter uppercase italic">Controle Boldt</h1>
             <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
-                <input type="password" id="passwordInput" placeholder="Sua senha" class="w-full bg-white/5 text-center text-white rounded-xl py-5 border border-white/10 outline-none focus:border-brand-blue transition-all font-bold tracking-widest">
-                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest">Acessar</button>
+                <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/5 text-center text-white rounded-2xl py-5 border border-white/10 outline-none focus:border-brand-blue transition-all font-bold tracking-widest text-lg">
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-2xl font-bold uppercase tracking-widest hover:brightness-110 transition-all">Entrar</button>
             </form>
-            <p id="errorMsg" class="mt-4 text-brand-blue text-[10px] font-bold hidden uppercase tracking-widest">Senha Incorreta</p>
+            <p id="errorMsg" class="mt-6 text-red-500 text-[10px] font-black hidden uppercase">Acesso Negado</p>
         </div>
     </div>
 
-    <!-- APP CONTENT -->
+    <!-- APP -->
     <div id="appContent" class="hidden flex-col min-h-screen">
-        <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40">
-            <div class="font-black tracking-tighter italic text-xl uppercase">Controle Boldt</div>
+        <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40 backdrop-blur-md bg-white/90">
+            <div class="font-black tracking-tighter italic text-2xl uppercase">Controle Boldt</div>
             <div class="flex gap-2">
-                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400"><i class="fa-solid fa-gear text-xs"></i></button>
-                <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black"><i class="fa-solid fa-power-off text-xs"></i></button>
+                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors"><i class="fa-solid fa-gear text-xs"></i></button>
+                <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-power-off text-xs"></i></button>
             </div>
         </nav>
 
-        <main class="p-6 container mx-auto max-w-6xl">
+        <main class="p-6 container mx-auto max-w-7xl">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- FORM -->
                 <div class="lg:col-span-4">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
-                        <h3 class="text-[10px] font-black uppercase mb-6 tracking-[0.2em] text-gray-400 italic">Novo Empréstimo</h3>
+                    <div class="bg-white p-7 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
+                        <h3 class="text-[11px] font-black uppercase mb-6 tracking-widest text-gray-400">Novo Empréstimo</h3>
                         <form id="debtForm" class="space-y-4">
-                            <input type="text" id="name" placeholder="Nome do Cliente" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
+                            <input type="text" id="name" placeholder="Nome do Cliente" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
                             <div class="grid grid-cols-2 gap-3">
-                                <input type="number" id="amount" step="0.01" placeholder="Principal" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
-                                <input type="number" id="rate" placeholder="Taxa %" value="7" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
+                                <input type="number" id="amount" step="0.01" placeholder="Principal R$" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
+                                <input type="number" id="rate" placeholder="Taxa %" value="7" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <input type="date" id="startDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold">
-                                <input type="date" id="payDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold">
+                                <input type="date" id="startDate" required class="custom-input w-full px-3 py-3 rounded-2xl bg-white text-xs font-bold">
+                                <input type="date" id="payDate" required class="custom-input w-full px-3 py-3 rounded-2xl bg-white text-xs font-bold">
                             </div>
-                            <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Registrar</button>
+                            <button type="submit" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-[0.98] transition-all">Registrar</button>
                         </form>
                     </div>
                 </div>
 
-                <!-- DASH -->
                 <div class="lg:col-span-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
-                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-70">A Receber</span>
-                            <div id="displayPending" class="text-2xl font-black mt-1">R$ 0,00</div>
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">A Receber</span>
+                            <div id="displayPending" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
                         <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-red-500">
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Vencidos</span>
-                            <div id="displayOverdue" class="text-2xl font-black mt-1">R$ 0,00</div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-gray-300">Vencidos</span>
+                            <div id="displayOverdue" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
-                        <div class="bg-brand-green/10 p-6 rounded-3xl border border-brand-green/20 text-brand-green">
-                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-80">Lucro Realizado</span>
-                            <div id="displayProfit" class="text-2xl font-black mt-1">R$ 0,00</div>
+                        <div class="bg-emerald-500 p-6 rounded-3xl text-white shadow-xl shadow-emerald-100">
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-70">Lucro Total</span>
+                            <div id="displayProfit" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-6 border-b border-gray-50 flex justify-between items-center">
-                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 tracking-widest">Carteira Ativa</h3>
-                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[9px] font-bold uppercase px-4 py-2 rounded-full bg-gray-50 text-gray-400 transition-all">Filtrar Abertos</button>
+                            <h3 class="text-[11px] font-black uppercase tracking-widest text-gray-400">Contratos Ativos</h3>
+                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[10px] font-black uppercase px-5 py-2.5 rounded-full bg-gray-50 text-gray-400 transition-all border border-transparent hover:border-gray-200">Ver Abertos</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
-                                <thead class="bg-gray-50/50 text-[9px] uppercase font-bold text-gray-400 tracking-widest">
+                                <thead class="bg-gray-50/50 text-[10px] uppercase font-black text-gray-400 tracking-widest">
                                     <tr>
-                                        <th class="px-6 py-5">Cliente</th>
+                                        <th class="px-6 py-5">Cliente / Vencimento</th>
                                         <th class="px-6 py-5 text-right">Saldo Atualizado</th>
-                                        <th class="px-6 py-5 text-center">Ações</th>
+                                        <th class="px-6 py-5 text-center">Gestão</th>
                                     </tr>
                                 </thead>
                                 <tbody id="debtTableBody" class="divide-y divide-gray-50"></tbody>
                             </table>
                         </div>
-                        <div id="emptyState" class="hidden py-32 text-center text-gray-300 uppercase font-black text-xs tracking-widest">Sem registros no momento</div>
+                        <div id="emptyState" class="hidden py-32 text-center text-gray-300 uppercase font-black text-xs">Vazio</div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- LOADER -->
-    <div id="globalLoader" class="fixed inset-0 bg-white/90 z-[300] hidden flex flex-col items-center justify-center backdrop-blur-md">
-        <div class="w-12 h-12 border-[6px] border-gray-100 border-t-brand-blue rounded-full animate-spin"></div>
+    <div id="globalLoader" class="fixed inset-0 bg-white/95 z-[300] hidden flex flex-col items-center justify-center backdrop-blur-sm">
+        <div class="w-14 h-14 border-[6px] border-gray-100 border-t-brand-blue rounded-full animate-spin"></div>
     </div>
 
     <script>
@@ -207,7 +178,6 @@
         function showLoader(v) { document.getElementById('globalLoader').classList.toggle('hidden', !v); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // LOGIN
         function checkLogin() {
             if (document.getElementById('passwordInput').value === 'boldt') {
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -215,10 +185,7 @@
                 document.getElementById('appContent').classList.add('flex');
                 localStorage.setItem('boldt_session', 'active');
                 init();
-            } else {
-                document.getElementById('errorMsg').classList.remove('hidden');
-                setTimeout(() => document.getElementById('errorMsg').classList.add('hidden'), 2000);
-            }
+            } else { document.getElementById('errorMsg').classList.remove('hidden'); }
         }
         function logout() { localStorage.removeItem('boldt_session'); location.reload(); }
         if (localStorage.getItem('boldt_session') === 'active') {
@@ -228,12 +195,7 @@
             init();
         }
 
-        function init() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            document.getElementById('payDate').value = today;
-            load();
-        }
+        function init() { load(); }
 
         async function load() {
             showLoader(true);
@@ -248,62 +210,25 @@
         async function action(payload) {
             showLoader(true);
             try {
-                const res = await fetch(getApi(), { 
+                await fetch(getApi(), { 
                     method: 'POST', 
                     redirect: "follow",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload) 
                 });
-                closeModal('editModal'); 
                 closeModal('partialModal');
                 setTimeout(load, 1500);
-            } catch (e) { 
-                alert("Erro ao sincronizar dados."); 
-                showLoader(false); 
-            }
+            } catch (e) { alert("Erro ao salvar."); showLoader(false); }
         }
 
-        // CRUD
         document.getElementById('debtForm').addEventListener('submit', e => {
             e.preventDefault();
-            action({ 
-                action: 'create', 
-                data: { 
-                    name: document.getElementById('name').value, 
-                    amount: Number(document.getElementById('amount').value), 
-                    rate: Number(document.getElementById('rate').value), 
-                    startDate: document.getElementById('startDate').value, 
-                    payDate: document.getElementById('payDate').value, 
-                    id: 'ID'+Date.now(), 
-                    status: 'pending' 
-                } 
-            });
+            action({ action: 'create', data: { name: document.getElementById('name').value, amount: Number(document.getElementById('amount').value), rate: Number(document.getElementById('rate').value), startDate: document.getElementById('startDate').value, payDate: document.getElementById('payDate').value, id: 'ID'+Date.now(), status: 'pending' } });
             e.target.reset();
         });
 
-        window.deleteItem = (id) => { 
-            if(confirm("Deseja apagar esse registro para sempre?")) {
-                action({ action: 'delete', id: String(id) }); 
-            }
-        };
+        window.deleteItem = (id) => { if(confirm("Apagar permanentemente?")) action({ action: 'delete', id: String(id) }); };
         
-        window.openEdit = (id) => {
-            const d = debts.find(x => String(x.id) === String(id));
-            if(!d) return;
-            document.getElementById('editId').value = d.id;
-            document.getElementById('editName').value = d.name;
-            document.getElementById('editAmount').value = Number(d.amount);
-            document.getElementById('editRate').value = Number(d.rate);
-            document.getElementById('editStart').value = d.startDate.split('T')[0];
-            document.getElementById('editPay').value = d.payDate.split('T')[0];
-            document.getElementById('editModal').classList.remove('hidden');
-        };
-
-        document.getElementById('editForm').addEventListener('submit', e => {
-            e.preventDefault();
-            action({ action: 'update', data: { id: document.getElementById('editId').value, name: document.getElementById('editName').value, amount: Number(document.getElementById('editAmount').value), rate: Number(document.getElementById('editRate').value), startDate: document.getElementById('editStart').value, payDate: document.getElementById('editPay').value } });
-        });
-
         window.openPartial = (id) => {
             const d = debts.find(x => String(x.id) === String(id));
             if(!d) return;
@@ -315,103 +240,43 @@
             
             const iData = getInterestData(d);
             document.getElementById('partialInterestBadge').innerText = `Juros acumulados: ${formatMoney(iData.remaining)}`;
-
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
-            let history = [];
-            try { history = JSON.parse(d.history || "[]"); } catch(e){}
-            
-            if(history.length === 0) {
-                list.innerHTML = '<p class="text-[9px] text-gray-300 uppercase text-center py-2 italic font-bold">Vazio</p>';
-            } else {
-                history.forEach(h => {
-                    const div = document.createElement('div');
-                    div.className = "flex justify-between text-[10px] bg-gray-50 p-3 rounded-xl border border-gray-100";
-                    div.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="font-bold text-gray-600">${formatDate(h.date)}</span>
-                            <span class="text-[8px] uppercase font-black ${h.type === 'amortization' ? 'text-blue-500' : 'text-green-500'}">${h.type === 'amortization' ? 'Abate Principal' : 'Juros'}</span>
-                        </div>
-                        <span class="font-black text-brand-black self-center">${formatMoney(Number(h.value))}</span>
-                    `;
-                    list.appendChild(div);
-                });
-            }
             document.getElementById('partialModal').classList.remove('hidden');
         };
 
         document.getElementById('partialForm').addEventListener('submit', e => {
             e.preventDefault();
-            action({
-                action: 'partial',
-                id: document.getElementById('partialId').value,
-                value: Number(document.getElementById('partialAmount').value),
-                date: document.getElementById('partialDate').value,
-                amortize: Boolean(document.getElementById('partialAmortize').checked)
-            });
+            action({ action: 'partial', id: document.getElementById('partialId').value, value: Number(document.getElementById('partialAmount').value), date: document.getElementById('partialDate').value, amortize: Boolean(document.getElementById('partialAmortize').checked) });
         });
 
-        window.updateStatus = (id, s) => {
-            action({ action: 'updateStatus', id, status: s === 'paid' ? 'pending' : 'paid' });
-        };
+        window.updateStatus = (id, s) => action({ action: 'updateStatus', id, status: s === 'paid' ? 'pending' : 'paid' });
 
-        // CÁLCULOS
         function formatMoney(v) { return Number(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
-        function formatDate(s) { 
-            if(!s) return '-'; 
-            const p = s.split('T')[0].split('-'); 
-            return `${p[2]}/${p[1]}/${p[0]}`; 
-        }
+        function formatDate(s) { if(!s) return '-'; const p = s.split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
 
         function setStatusFilter(s) {
             statusFilter = s === statusFilter ? 'all' : s;
-            const btn = document.getElementById('chip-pending');
-            btn.classList.toggle('bg-blue-500', statusFilter === 'pending');
-            btn.classList.toggle('text-white', statusFilter === 'pending');
+            document.getElementById('chip-pending').classList.toggle('bg-blue-500', statusFilter === 'pending');
+            document.getElementById('chip-pending').classList.toggle('text-white', statusFilter === 'pending');
             render();
         }
 
-        // LÓGICA DE JUROS - CORRIGIDA PARA EVITAR DESCONTO DUPLO
         function getInterestData(d) {
             const start = new Date(d.startDate.split('T')[0] + "T12:00:00");
             const end = new Date(d.payDate.split('T')[0] + "T12:00:00");
             const months = Math.max(0, (end - start) / (1000 * 60 * 60 * 24 * 30));
-            
-            // O Principal da planilha já pode ter sido reduzido por abates anteriores
-            const basePrincipal = Number(d.amount); 
+            const principal = Number(d.amount); 
             const rate = Number(d.rate) / 100;
-            const totalJurosCalculado = basePrincipal * (rate * months);
-            
-            let history = [];
-            try { history = JSON.parse(d.history || "[]"); } catch(e){}
-            
-            // Somamos apenas o que foi pago como JUROS (amortize=false)
-            const jurosPagos = history.reduce((acc, h) => h.type !== 'amortization' ? acc + Number(h.value) : acc, 0);
-            
-            return {
-                original: totalJurosCalculado,
-                paid: jurosPagos,
-                remaining: Math.max(0, totalJurosCalculado - jurosPagos)
-            };
+            const jurosBruto = principal * rate * months;
+            let history = JSON.parse(d.history || "[]");
+            const jurosPagos = history.reduce((acc, h) => h.type === 'interest' ? acc + Number(h.value) : acc, 0);
+            return { remaining: Math.max(0, jurosBruto - jurosPagos) };
         }
 
         function getWhatsappLink(d) {
             const principal = Number(d.amount);
             const interestData = getInterestData(d);
-            const totalDue = principal + interestData.remaining;
-            let histText = "";
-            let history = JSON.parse(d.history || "[]");
-            if(history.length > 0) {
-                histText = "%0A%0A*Histórico:*";
-                history.forEach(h => {
-                    histText += `%0A📅 ${formatDate(h.date)}: R$ ${Number(h.value).toFixed(2).replace('.', ',')} (${h.type === 'amortization' ? 'Abat.' : 'Juros'})`;
-                });
-            }
-            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20seu%20extrato%20Controle%20Boldt%20atualizado:%0A%0A` +
-                         `📌 *Principal:* ${formatMoney(principal)}%0A` +
-                         `📈 *Juros Pendentes:* ${formatMoney(interestData.remaining)}%0A` +
-                         `💰 *Total para Quitação:* ${formatMoney(totalDue)}` +
-                         `${histText}`;
+            const total = principal + interestData.remaining;
+            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20extrato%20Controle%20Boldt:%0A%0A📌%20*Principal:*%20${formatMoney(principal)}%0A📈%20*Juros:*%20${formatMoney(interestData.remaining)}%0A💰%20*Total:*%20${formatMoney(total)}`;
             return `https://wa.me/?text=${text}`;
         }
 
@@ -421,52 +286,41 @@
             let pendingSum = 0, overdueSum = 0, profitSum = 0;
 
             debts.forEach(d => {
-                let history = [];
-                try { history = JSON.parse(d.history || "[]"); } catch(e){}
+                let history = JSON.parse(d.history || "[]");
                 history.forEach(h => { profitSum += Number(h.value); });
-
                 if (statusFilter === 'pending' && d.status === 'paid') return;
                 
-                const amt = Number(d.amount);
+                const principal = Number(d.amount);
                 const interestData = getInterestData(d);
-                
-                // O Saldo Total é o Principal da planilha + Juros que ainda não foram pagos.
-                const total = amt + interestData.remaining;
+                const totalGeral = principal + interestData.remaining;
                 const isPaid = d.status === 'paid';
-                
-                const today = new Date(); today.setHours(0,0,0,0);
                 const venc = new Date(d.payDate.split('T')[0] + "T12:00:00");
-                const isOver = !isPaid && venc < today;
+                const isOver = !isPaid && venc < (new Date().setHours(0,0,0,0));
 
-                if (!isPaid) { 
-                    pendingSum += total; 
-                    if (isOver) overdueSum += total; 
-                }
+                if (!isPaid) { pendingSum += totalGeral; if (isOver) overdueSum += totalGeral; }
 
                 const tr = document.createElement('tr');
-                tr.className = "group hover:bg-gray-50 transition-all border-b border-gray-50";
+                tr.className = "group hover:bg-gray-50 transition-all border-b border-gray-50 fade-in";
                 tr.innerHTML = `
                     <td class="px-6 py-5">
                         <div class="font-black text-sm ${isPaid ? 'text-gray-300' : 'text-black'}">${d.name}</div>
-                        <div class="text-[9px] uppercase font-bold text-gray-400 mt-1 italic">${formatDate(d.payDate)}</div>
+                        <div class="text-[9px] uppercase font-black text-gray-400 mt-1 italic">${formatDate(d.payDate)}</div>
                     </td>
                     <td class="px-6 py-5 text-right">
-                        <div class="font-black text-sm ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-black')}">${formatMoney(total)}</div>
-                        ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-bold mt-1 tracking-tighter italic">Princ: ${formatMoney(amt)} / Jur: ${formatMoney(interestData.remaining)}</div>` : ''}
+                        <div class="font-black text-lg ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-brand-blue')} tracking-tight">${formatMoney(totalGeral)}</div>
+                        ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-black mt-1">Princ: ${formatMoney(principal)} / Jur: ${formatMoney(interestData.remaining)}</div>` : ''}
                     </td>
                     <td class="px-6 py-5 text-center">
-                        <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <a href="${getWhatsappLink(d)}" target="_blank" class="w-8 h-8 rounded-lg bg-gray-50 text-green-500 hover:bg-green-600 hover:text-white flex items-center justify-center transition-all"><i class="fa-brands fa-whatsapp"></i></a>
-                            <button onclick="openPartial('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all"><i class="fa-solid fa-dollar-sign"></i></button>
-                            <button onclick="openEdit('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-8 h-8 rounded-lg bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-check-double"></i></button>
-                            <button onclick="deleteItem('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-red-300 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button>
+                        <div class="flex items-center justify-center gap-1 opacity-10 md:opacity-0 group-hover:opacity-100 transition-all">
+                            <a href="${getWhatsappLink(d)}" target="_blank" class="w-9 h-9 rounded-xl bg-gray-50 text-green-500 hover:bg-green-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fa-brands fa-whatsapp"></i></a>
+                            <button onclick="openPartial('${d.id}')" class="w-9 h-9 rounded-xl bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-sm"><i class="fa-solid fa-dollar-sign"></i></button>
+                            <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-9 h-9 rounded-xl bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all shadow-sm"><i class="fa-solid fa-check-double text-[10px]"></i></button>
+                            <button onclick="deleteItem('${d.id}')" class="w-9 h-9 rounded-xl bg-gray-50 text-red-300 hover:bg-red-500 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-
             document.getElementById('displayPending').innerText = formatMoney(pendingSum);
             document.getElementById('displayOverdue').innerText = formatMoney(overdueSum);
             document.getElementById('displayProfit').innerText = formatMoney(profitSum);
