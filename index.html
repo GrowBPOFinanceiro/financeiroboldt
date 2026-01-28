@@ -43,21 +43,21 @@
     <div id="editModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl fade-in">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black uppercase tracking-tight">Editar Contrato</h3>
+                <h3 class="text-lg font-black uppercase tracking-tight">Editar Contrato Inicial</h3>
                 <button onclick="closeModal('editModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="editForm" class="space-y-4">
                 <input type="hidden" id="editId">
                 <input type="text" id="editName" placeholder="Cliente" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="editAmount" step="0.01" placeholder="Principal R$" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
+                    <input type="number" id="editAmount" step="0.01" placeholder="Principal Original R$" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
                     <input type="number" id="editRate" step="0.1" placeholder="Taxa %" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <input type="date" id="editStart" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
                     <input type="date" id="editPay" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
                 </div>
-                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar</button>
+                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Guardar Alterações</button>
             </form>
         </div>
     </div>
@@ -66,21 +66,21 @@
     <div id="partialModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl fade-in relative text-center">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-black uppercase tracking-tight">Novo Pagamento</h3>
+                <h3 class="text-lg font-black uppercase tracking-tight">Registar Pagamento</h3>
                 <button onclick="closeModal('partialModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="bg-blue-50 p-5 rounded-2xl mb-4">
-                <p class="text-[10px] text-blue-800 uppercase font-black mb-1 opacity-60">Dívida Total (P+J)</p>
+                <p class="text-[10px] text-blue-800 uppercase font-black mb-1 opacity-60">Valor Total Contratado (P+J)</p>
                 <p id="partialTotalInitial" class="text-2xl font-black text-brand-blue tracking-tighter">R$ 0,00</p>
-                <div id="partialPaidBadge" class="mt-2 inline-block px-3 py-1 bg-green-100 rounded-full text-[10px] font-black text-green-700 uppercase italic">Já pago: R$ 0,00</div>
+                <div id="partialPaidBadge" class="mt-2 inline-block px-3 py-1 bg-green-100 rounded-full text-[10px] font-black text-green-700 uppercase italic">Já amortizado: R$ 0,00</div>
             </div>
             <form id="partialForm" class="space-y-4">
                 <input type="hidden" id="partialId">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="date" id="partialDate" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold">
-                    <input type="number" id="partialAmount" step="0.01" placeholder="Valor" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
+                    <input type="number" id="partialAmount" step="0.01" placeholder="Valor Pago" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
                 </div>
-                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-lg">Confirmar</button>
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-lg">Confirmar Recebimento</button>
             </form>
         </div>
     </div>
@@ -90,8 +90,8 @@
         <div class="w-full max-w-sm">
             <h1 class="text-4xl font-black text-white mb-12 tracking-tighter uppercase italic">Controle Boldt</h1>
             <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
-                <input type="password" id="passwordInput" placeholder="Chave" class="w-full bg-white/5 text-center text-white rounded-2xl py-5 border border-white/10 outline-none focus:border-brand-blue font-bold tracking-widest text-lg">
-                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest">Acessar</button>
+                <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/5 text-center text-white rounded-2xl py-5 border border-white/10 outline-none focus:border-brand-blue font-bold tracking-widest text-lg">
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest">Aceder</button>
             </form>
         </div>
     </div>
@@ -101,7 +101,7 @@
         <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40">
             <div class="font-black tracking-tighter italic text-2xl uppercase">Controle Boldt</div>
             <div class="flex gap-2">
-                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400"><i class="fa-solid fa-gear text-xs"></i></button>
+                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors"><i class="fa-solid fa-gear text-xs"></i></button>
                 <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-power-off text-xs"></i></button>
             </div>
         </nav>
@@ -110,9 +110,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div class="lg:col-span-4">
                     <div class="bg-white p-7 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
-                        <h3 class="text-[11px] font-black uppercase mb-6 text-gray-400 tracking-widest">Lançar Empréstimo</h3>
+                        <h3 class="text-[11px] font-black uppercase mb-6 text-gray-400 tracking-widest">Novo Contrato</h3>
                         <form id="debtForm" class="space-y-4">
-                            <input type="text" id="name" placeholder="Cliente" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
+                            <input type="text" id="name" placeholder="Nome do Cliente" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
                             <div class="grid grid-cols-2 gap-3">
                                 <input type="number" id="amount" step="0.01" placeholder="Principal R$" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
                                 <input type="number" id="rate" placeholder="Taxa %" value="7" required class="custom-input w-full px-4 py-3.5 rounded-2xl bg-gray-50 font-bold text-sm">
@@ -121,38 +121,38 @@
                                 <input type="date" id="startDate" required class="custom-input w-full px-3 py-3 rounded-2xl bg-white text-xs font-bold">
                                 <input type="date" id="payDate" required class="custom-input w-full px-3 py-3 rounded-2xl bg-white text-xs font-bold">
                             </div>
-                            <button type="submit" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Registrar</button>
+                            <button type="submit" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Lançar no Sistema</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="lg:col-span-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
-                        <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl">
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Total Devedor</span>
-                            <div id="displayPending" class="text-3xl font-black mt-1">R$ 0,00</div>
+                        <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Total a Receber</span>
+                            <div id="displayPending" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
                         <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-red-500">
                             <span class="text-[10px] font-black uppercase tracking-widest text-gray-300">Total Vencido</span>
-                            <div id="displayOverdue" class="text-3xl font-black mt-1">R$ 0,00</div>
+                            <div id="displayOverdue" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
-                        <div class="bg-emerald-500 p-6 rounded-3xl text-white shadow-xl">
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-70">Total Recebido</span>
-                            <div id="displayProfit" class="text-3xl font-black mt-1">R$ 0,00</div>
+                        <div class="bg-emerald-500 p-6 rounded-3xl text-white shadow-xl shadow-emerald-100">
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-70">Amortizações Totais</span>
+                            <div id="displayProfit" class="text-3xl font-black mt-1 tracking-tighter">R$ 0,00</div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-6 border-b border-gray-50 flex justify-between items-center">
                             <h3 class="text-[11px] font-black uppercase tracking-widest text-gray-400">Carteira Ativa</h3>
-                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[10px] font-black uppercase px-5 py-2.5 rounded-full bg-gray-50 text-gray-400 transition-all">Ver Abertos</button>
+                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[10px] font-black uppercase px-5 py-2.5 rounded-full bg-gray-50 text-gray-400 transition-all border border-transparent hover:border-gray-200">Apenas Abertos</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-50/50 text-[10px] uppercase font-black text-gray-400 tracking-widest">
                                     <tr>
-                                        <th class="px-6 py-5">Cliente</th>
-                                        <th class="px-6 py-5 text-right">Saldo Devedor</th>
+                                        <th class="px-6 py-5">Cliente / Vencimento</th>
+                                        <th class="px-6 py-5 text-right">Saldo Atualizado</th>
                                         <th class="px-6 py-5 text-center">Gestão</th>
                                     </tr>
                                 </thead>
@@ -165,7 +165,7 @@
         </main>
     </div>
 
-    <div id="globalLoader" class="fixed inset-0 bg-white/95 z-[300] hidden flex items-center justify-center">
+    <div id="globalLoader" class="fixed inset-0 bg-white/95 z-[300] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="w-14 h-14 border-[6px] border-gray-100 border-t-brand-blue rounded-full animate-spin"></div>
     </div>
 
@@ -229,7 +229,7 @@
             e.target.reset();
         });
 
-        window.deleteItem = (id) => { if(confirm("Apagar permanentemente?")) action({ action: 'delete', id: String(id) }); };
+        window.deleteItem = (id) => { if(confirm("Eliminar este contrato definitivamente?")) action({ action: 'delete', id: String(id) }); };
 
         window.openEdit = (id) => {
             const d = debts.find(x => String(x.id) === String(id));
@@ -254,7 +254,7 @@
             document.getElementById('partialId').value = d.id;
             const data = getStaticData(d);
             document.getElementById('partialTotalInitial').innerText = formatMoney(data.initialTotal);
-            document.getElementById('partialPaidBadge').innerText = `Pago: ${formatMoney(data.paidTotal)}`;
+            document.getElementById('partialPaidBadge').innerText = `Já amortizado: ${formatMoney(data.paidTotal)}`;
             document.getElementById('partialDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('partialAmount').value = '';
             document.getElementById('partialModal').classList.remove('hidden');
@@ -277,33 +277,33 @@
             render();
         }
 
-        // LÓGICA DE SUBTRAÇÃO PURA (VALOR INICIAL FIXO)
+        // LÓGICA DE SUBTRAÇÃO PURA: O montante inicial é fixo. O saldo é apenas uma conta matemática.
         function getStaticData(d) {
-            const P = Number(d.amount); // Principal inicial da Coluna 3
+            const P = Number(d.amount); // Este valor na Coluna 3 NÃO deve mudar no Script
             const R = Number(d.rate) / 100;
             const start = new Date(d.startDate.split('T')[0] + "T12:00:00");
             const end = new Date(d.payDate.split('T')[0] + "T12:00:00");
             const M = Math.max(0, (end - start) / (1000 * 60 * 60 * 24 * 30));
             
-            const JurosFixo = P * R * M;
-            const InicialTotal = P + JurosFixo;
+            const JurosOriginal = P * R * M;
+            const TotalInicialContratado = P + JurosOriginal;
             
             let hist = [];
             try { hist = JSON.parse(d.history || "[]"); } catch(e){}
-            const PagoTotal = hist.reduce((acc, h) => acc + Number(h.value), 0);
+            const TotalAmortizado = hist.reduce((acc, h) => acc + Number(h.value), 0);
             
             return {
-                initialTotal: InicialTotal,
-                paidTotal: PagoTotal,
-                currentBalance: Math.max(0, InicialTotal - PagoTotal),
-                p: P,
-                j: JurosFixo
+                initialTotal: TotalInicialContratado,
+                paidTotal: TotalAmortizado,
+                currentBalance: Math.max(0, TotalInicialContratado - TotalAmortizado),
+                p_original: P,
+                j_original: JurosOriginal
             };
         }
 
         function getWhatsappLink(d) {
             const data = getStaticData(d);
-            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20extrato%20Controle%20Boldt:%0A📌%20*Dívida:*%20${formatMoney(data.initialTotal)}%0A✅%20*Pago:*%20${formatMoney(data.paidTotal)}%0A💰%20*Saldo:*%20${formatMoney(data.currentBalance)}`;
+            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20extrato%20Controle%20Boldt:%0A📌%20*Dívida%20Inicial:*%20${formatMoney(data.initialTotal)}%0A✅%20*Total%20Pago:*%20${formatMoney(data.paidTotal)}%0A💰%20*Saldo%20Devedor:*%20${formatMoney(data.currentBalance)}`;
             return `https://wa.me/?text=${text}`;
         }
 
@@ -332,15 +332,15 @@
                 tr.innerHTML = `
                     <td class="px-6 py-5">
                         <div class="font-black text-sm ${isPaid ? 'text-gray-300' : 'text-black'}">${d.name}</div>
-                        <div class="text-[9px] uppercase font-black text-gray-400 mt-1">${formatDate(d.payDate)}</div>
+                        <div class="text-[9px] uppercase font-black text-gray-400 mt-1 italic">${formatDate(d.payDate)}</div>
                     </td>
                     <td class="px-6 py-5 text-right">
                         <div class="font-black text-lg ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-brand-blue')} tracking-tight">${formatMoney(data.currentBalance)}</div>
-                        ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-black mt-1">Dívida Inicial: ${formatMoney(data.initialTotal)}</div>` : ''}
+                        ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-black mt-1">Dívida Original: ${formatMoney(data.initialTotal)}</div>` : ''}
                     </td>
                     <td class="px-6 py-5 text-center">
                         <div class="flex items-center justify-center gap-1 opacity-10 md:opacity-0 group-hover:opacity-100 transition-all">
-                            <a href="${getWhatsappLink(d)}" target="_blank" class="w-9 h-9 rounded-xl bg-gray-50 text-green-500 hover:bg-green-600 hover:text-white flex items-center justify-center shadow-sm transition-all"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="${getWhatsappLink(d)}" target="_blank" class="w-9 h-9 rounded-xl bg-gray-50 text-green-500 hover:bg-green-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fa-brands fa-whatsapp"></i></a>
                             <button onclick="openPartial('${d.id}')" class="w-9 h-9 rounded-xl bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-sm"><i class="fa-solid fa-dollar-sign"></i></button>
                             <button onclick="openEdit('${d.id}')" class="w-9 h-9 rounded-xl bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all shadow-sm"><i class="fa-solid fa-pen text-[10px]"></i></button>
                             <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-9 h-9 rounded-xl bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all shadow-sm"><i class="fa-solid fa-check-double text-[10px]"></i></button>
@@ -353,6 +353,9 @@
             document.getElementById('displayPending').innerText = formatMoney(pendingSum);
             document.getElementById('displayOverdue').innerText = formatMoney(overdueSum);
             document.getElementById('displayProfit').innerText = formatMoney(profitSum);
+            if (debts.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="3" class="py-20 text-center text-gray-300 font-black uppercase text-xs tracking-widest">Nenhum contrato ativo</td></tr>';
+            }
         }
         function logout() { localStorage.removeItem('boldt_session'); location.reload(); }
     </script>
