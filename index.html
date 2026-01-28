@@ -276,9 +276,16 @@
             showLoader(true);
             try {
                 const res = await fetch(API_URL);
-                const data = await res.json();
-                if (Array.isArray(data)) debts = data;
-                render();
+                const text = await res.text();
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (Array.isArray(data)) debts = data;
+                    render();
+                } catch(e) {
+                    console.error("Resposta inválida (GET):", text);
+                    // Não alertar no GET para não travar a UX, mas logar
+                }
             } catch (e) { console.error(e); } finally { showLoader(false); }
         }
 
@@ -287,23 +294,33 @@
             showLoader(true);
             try {
                 // ATENÇÃO: Headers configurados para evitar bloqueio CORS do Google Script
-                await fetch(API_URL, { 
+                const res = await fetch(API_URL, { 
                     method: 'POST', 
-                    redirect: 'follow',
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload) 
                 });
                 
+                const text = await res.text();
+                
+                // Tenta ler o JSON de resposta
+                try {
+                    const json = JSON.parse(text);
+                    console.log("Resposta do servidor:", json);
+                } catch (parseError) {
+                    console.error("Erro de Parsing:", text);
+                    throw new Error("O sistema recebeu uma resposta inválida do servidor. Provavelmente o Script não foi atualizado ('Nova Versão') ou as permissões estão erradas.");
+                }
+                
                 // Sucesso
-                console.log("Ação realizada:", payload.action);
                 document.getElementById('debtForm').reset();
                 closeModal('editModal');
                 closeModal('partialModal');
-                initSystem();
-                await fetchDebts();
+                initSystem(); // Reseta datas
+                await fetchDebts(); // Recarrega lista
+                
             } catch (e) { 
                 console.error("Erro na API:", e);
-                alert("Erro ao salvar. Verifique sua conexão."); 
+                alert("Falha na operação: " + e.message); 
             } finally { showLoader(false); }
         }
 
