@@ -286,18 +286,31 @@
         async function apiAction(payload) {
             showLoader(true);
             try {
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                // ATENÇÃO: Headers configurados para evitar bloqueio CORS do Google Script
+                await fetch(API_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload) 
+                });
+                
+                // Sucesso
+                console.log("Ação realizada:", payload.action);
                 document.getElementById('debtForm').reset();
                 closeModal('editModal');
                 closeModal('partialModal');
                 initSystem();
                 await fetchDebts();
-            } catch (e) { alert("Erro de conexão"); } finally { showLoader(false); }
+            } catch (e) { 
+                console.error("Erro na API:", e);
+                alert("Erro ao salvar. Verifique sua conexão."); 
+            } finally { showLoader(false); }
         }
 
         // Create
         document.getElementById('debtForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            console.log("Registrando novo...");
             apiAction({ 
                 action: 'create', 
                 data: { 
