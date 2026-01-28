@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BOLDT FINANCIAL</title>
+    <title>Controle Boldt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -26,10 +26,8 @@
         .custom-input { transition: all 0.2s ease; border: 1px solid #e5e7eb; }
         .custom-input:focus { border-color: #0033CC; box-shadow: 0 0 0 3px rgba(0, 51, 204, 0.1); }
         .modal-bg { background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-        .filter-btn.active { background-color: #000; color: #fff; border-color: #000; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-brand-gray text-brand-navy flex flex-col min-h-screen">
@@ -38,9 +36,8 @@
     <div id="configModal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <h3 class="text-lg font-black mb-4 uppercase">Configuração API</h3>
-            <p class="text-[10px] text-gray-400 mb-4 uppercase font-bold tracking-widest">Cole a URL do Google Apps Script abaixo.</p>
-            <textarea id="apiUrlInput" rows="3" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-xs mb-4 outline-none" placeholder="https://script.google.com/macros/s/.../exec"></textarea>
-            <button onclick="saveConfig()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Salvar e Reconectar</button>
+            <textarea id="apiUrlInput" rows="3" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-xs mb-4 outline-none" placeholder="Cole o link do Google Script..."></textarea>
+            <button onclick="saveConfig()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar</button>
         </div>
     </div>
 
@@ -48,7 +45,7 @@
     <div id="editModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black uppercase">Editar Registro</h3>
+                <h3 class="text-lg font-black uppercase tracking-tight">Editar Registro</h3>
                 <button onclick="closeModal('editModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="editForm" class="space-y-4">
@@ -62,7 +59,7 @@
                     <div class="space-y-1"><label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Início</label><input type="date" id="editStart" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold"></div>
                     <div class="space-y-1"><label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Vencimento</label><input type="date" id="editPay" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold"></div>
                 </div>
-                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Salvar Alterações</button>
+                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar Alterações</button>
             </form>
         </div>
     </div>
@@ -71,24 +68,25 @@
     <div id="partialModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative flex flex-col">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-black uppercase">Novo Pagamento</h3>
+                <h3 class="text-lg font-black uppercase tracking-tight">Registrar Pagamento</h3>
                 <button onclick="closeModal('partialModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             
             <div class="overflow-y-auto custom-scrollbar pr-1">
                 <div class="bg-blue-50 p-4 rounded-xl mb-4">
-                    <p class="text-[10px] text-blue-800 uppercase font-bold mb-1 tracking-wider">Dívida Principal Atual</p>
+                    <p class="text-[10px] text-blue-800 uppercase font-bold mb-1 tracking-wider">Valor Principal Atual</p>
                     <p id="partialCurrentDebt" class="text-2xl font-black text-brand-blue">R$ 0,00</p>
+                    <p id="partialInterestInfo" class="text-[9px] font-bold text-blue-600 mt-1 uppercase">Juros pendentes: R$ 0,00</p>
                 </div>
                 <div class="mb-4">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1">Histórico</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1">Histórico de Recebimentos</p>
                     <div id="historyList" class="space-y-2 max-h-32 overflow-y-auto"></div>
                 </div>
                 <form id="partialForm" class="space-y-4">
                     <input type="hidden" id="partialId">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1">
-                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Data Pagto</label>
+                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Data</label>
                             <input type="date" id="partialDate" required class="custom-input w-full px-2 py-3 rounded-xl bg-gray-50 text-xs font-bold">
                         </div>
                         <div class="space-y-1">
@@ -96,69 +94,60 @@
                             <input type="number" id="partialAmount" step="0.01" placeholder="0,00" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
                         </div>
                     </div>
-                    <!-- BOX DE ABATIMENTO PRINCIPAL -->
                     <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 cursor-pointer" onclick="document.getElementById('partialAmortize').click()">
                         <input type="checkbox" id="partialAmortize" class="w-6 h-6 accent-brand-blue cursor-pointer" onclick="event.stopPropagation()">
                         <div>
                             <span class="text-xs font-bold block text-brand-black">Abater do Principal?</span>
-                            <span class="text-[9px] text-gray-400 uppercase leading-none">Se marcado, reduz a dívida inicial</span>
+                            <span class="text-[9px] text-gray-400 uppercase leading-none">Desmarcado: Paga juros (excesso abate principal)</span>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Confirmar Pagamento</button>
+                    <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Confirmar</button>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- TELA LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[200] flex items-center justify-center p-6">
-        <div class="w-full max-w-sm text-center">
-            <h1 class="text-4xl font-black text-white mb-2 tracking-tighter italic font-serif">BOLDT</h1>
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">Financial Management</p>
+    <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[200] flex items-center justify-center p-6 text-center">
+        <div class="w-full max-w-sm">
+            <h1 class="text-4xl font-black text-white mb-10 tracking-tighter uppercase italic">Controle Boldt</h1>
             <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
                 <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/5 text-center text-white rounded-xl py-5 border border-white/10 outline-none focus:border-brand-blue transition-all font-bold tracking-widest">
-                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-white hover:text-brand-blue transition-all">Entrar</button>
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest">Entrar</button>
             </form>
-            <p id="errorMsg" class="mt-4 text-brand-blue text-[10px] font-bold hidden uppercase tracking-widest">Acesso Negado</p>
+            <p id="errorMsg" class="mt-4 text-brand-blue text-[10px] font-bold hidden uppercase">Senha Incorreta</p>
         </div>
     </div>
 
     <!-- APP CONTENT -->
     <div id="appContent" class="hidden flex-col min-h-screen">
-        <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40 backdrop-blur-md bg-white/80">
-            <div class="flex items-center gap-2 font-black tracking-tighter italic text-xl">
-                <div class="bg-black text-white px-2 py-0.5 rounded italic">B</div> BOLDT
+        <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40">
+            <div class="flex items-center gap-2 font-black tracking-tighter italic text-xl uppercase">
+                Controle Boldt
             </div>
             <div class="flex gap-2">
-                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-all"><i class="fa-solid fa-gear text-xs"></i></button>
-                <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-power-off text-xs"></i></button>
+                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black"><i class="fa-solid fa-gear text-xs"></i></button>
+                <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white"><i class="fa-solid fa-power-off text-xs"></i></button>
             </div>
         </nav>
 
-        <main class="p-4 container mx-auto max-w-6xl">
-            <!-- FILTROS -->
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-                <button onclick="setDateFilter('month')" class="filter-btn active px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-month">Mês Atual</button>
-                <button onclick="setDateFilter('year')" class="filter-btn px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-year">Ano</button>
-                <button onclick="setDateFilter('all')" class="filter-btn px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-all">Todo Período</button>
-            </div>
-
+        <main class="p-6 container mx-auto max-w-6xl">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <!-- FORMULÁRIO -->
                 <div class="lg:col-span-4">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
                         <h3 class="text-[10px] font-black uppercase mb-6 tracking-[0.2em] text-gray-400">Novo Lançamento</h3>
                         <form id="debtForm" class="space-y-4">
-                            <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Cliente</label><input type="text" id="name" placeholder="Nome completo" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
+                            <input type="text" id="name" placeholder="Nome do Cliente" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Valor Principal</label><input type="number" id="amount" step="0.01" placeholder="0,00" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
-                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Taxa (%)</label><input type="number" id="rate" placeholder="7" value="7" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
+                                <input type="number" id="amount" step="0.01" placeholder="Valor Principal" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
+                                <input type="number" id="rate" placeholder="Taxa %" value="7" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Data Inicial</label><input type="date" id="startDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold"></div>
-                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Vencimento</label><input type="date" id="payDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold"></div>
+                                <input type="date" id="startDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold">
+                                <input type="date" id="payDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold">
                             </div>
-                            <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs tracking-[0.2em] hover:bg-brand-blue transition-all shadow-lg shadow-gray-200">Registrar</button>
+                            <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Registrar</button>
                         </form>
                     </div>
                 </div>
@@ -166,12 +155,12 @@
                 <!-- DASHBOARD -->
                 <div class="lg:col-span-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
-                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-70">Previsão de Recebimento</span>
+                        <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl">
+                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-70">A Receber</span>
                             <div id="displayPending" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
                         <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-red-500">
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Total Vencido</span>
+                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Vencidos</span>
                             <div id="displayOverdue" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
                         <div class="bg-brand-green/10 p-6 rounded-3xl border border-brand-green/20 text-brand-green">
@@ -183,7 +172,7 @@
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-6 border-b border-gray-50 flex justify-between items-center">
                             <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Carteira Ativa</h3>
-                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[9px] font-bold uppercase px-4 py-2 rounded-full bg-gray-50 text-gray-400 transition-all">Ver somente abertos</button>
+                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[9px] font-bold uppercase px-4 py-2 rounded-full bg-gray-50 text-gray-400 transition-all">Ver Somente Abertos</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
@@ -207,13 +196,12 @@
     <!-- LOADER -->
     <div id="globalLoader" class="fixed inset-0 bg-white/90 z-[300] hidden flex flex-col items-center justify-center backdrop-blur-md">
         <div class="w-12 h-12 border-[6px] border-gray-100 border-t-brand-blue rounded-full animate-spin"></div>
-        <p class="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sincronizando</p>
+        <p class="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Controle Boldt</p>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwIpjP6OYRHaWUIZMqX5R8Kez-shL3gO8wpfqRXZEWNzvLKRSz6XrnDxip9sYZHWQqPQw/exec";
         let debts = [];
-        let dateFilter = 'month';
         let statusFilter = 'all';
 
         function getApi() { return localStorage.getItem('boldt_api_url') || API_URL; }
@@ -257,21 +245,16 @@
                 const data = await res.json();
                 if (Array.isArray(data)) debts = data;
                 render();
-            } catch (e) { 
-                console.error("Erro no carregamento:", e); 
-            } finally { 
-                showLoader(false); 
-            }
+            } catch (e) { console.error(e); } finally { showLoader(false); }
         }
 
-        // CORREÇÃO: ADICIONADOS HEADERS PARA GARANTIR QUE O COMANDO CHEGUE AO GOOGLE
         async function action(payload) {
             showLoader(true);
             try {
-                const res = await fetch(getApi(), { 
+                await fetch(getApi(), { 
                     method: 'POST', 
                     redirect: "follow",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }, // NECESSÁRIO PARA EVITAR ERRO DE CORS NO POST
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload) 
                 });
                 closeModal('editModal'); 
@@ -283,7 +266,6 @@
             }
         }
 
-        // CRUD
         document.getElementById('debtForm').addEventListener('submit', e => {
             e.preventDefault();
             action({ 
@@ -302,7 +284,7 @@
         });
 
         window.deleteItem = (id) => { 
-            if(confirm("Confirmar exclusão definitiva?")) {
+            if(confirm("Deseja apagar este registro permanentemente?")) {
                 action({ action: 'delete', id: String(id) }); 
             }
         };
@@ -321,17 +303,7 @@
 
         document.getElementById('editForm').addEventListener('submit', e => {
             e.preventDefault();
-            action({ 
-                action: 'update', 
-                data: { 
-                    id: document.getElementById('editId').value, 
-                    name: document.getElementById('editName').value, 
-                    amount: Number(document.getElementById('editAmount').value), 
-                    rate: Number(document.getElementById('editRate').value), 
-                    startDate: document.getElementById('editStart').value, 
-                    payDate: document.getElementById('editPay').value 
-                } 
-            });
+            action({ action: 'update', data: { id: document.getElementById('editId').value, name: document.getElementById('editName').value, amount: Number(document.getElementById('editAmount').value), rate: Number(document.getElementById('editRate').value), startDate: document.getElementById('editStart').value, payDate: document.getElementById('editPay').value } });
         });
 
         window.openPartial = (id) => {
@@ -343,11 +315,12 @@
             document.getElementById('partialAmortize').checked = false;
             document.getElementById('partialAmount').value = '';
             
+            const iData = getInterestData(d);
+            document.getElementById('partialInterestInfo').innerText = `Juros pendentes: ${formatMoney(iData.remaining)}`;
+
             const list = document.getElementById('historyList');
             list.innerHTML = '';
-            let history = [];
-            try { history = JSON.parse(d.history || "[]"); } catch(e){}
-            
+            let history = JSON.parse(d.history || "[]");
             if(history.length === 0) {
                 list.innerHTML = '<p class="text-[9px] text-gray-300 uppercase text-center py-2">Sem histórico</p>';
             } else {
@@ -374,70 +347,58 @@
                 id: document.getElementById('partialId').value,
                 value: Number(document.getElementById('partialAmount').value),
                 date: document.getElementById('partialDate').value,
-                amortize: Boolean(document.getElementById('partialAmortize').checked) // GARANTE ENVIO COMO BOOLEANO
+                amortize: Boolean(document.getElementById('partialAmortize').checked)
             });
         });
 
-        window.updateStatus = (id, s) => {
-            const newStatus = s === 'paid' ? 'pending' : 'paid';
-            action({ action: 'updateStatus', id, status: newStatus });
-        };
+        window.updateStatus = (id, s) => action({ action: 'updateStatus', id, status: s === 'paid' ? 'pending' : 'paid' });
 
-        // CALCULOS
+        // CÁLCULOS
         function formatMoney(v) { return Number(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
         function formatDate(s) { if(!s) return '-'; const p = s.split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
-
-        function setDateFilter(f) {
-            dateFilter = f;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-black', 'text-white'));
-            document.getElementById('btn-'+f).classList.add('active', 'bg-black', 'text-white');
-            render();
-        }
 
         function setStatusFilter(s) {
             statusFilter = s === statusFilter ? 'all' : s;
             const btn = document.getElementById('chip-pending');
             btn.classList.toggle('bg-blue-500', statusFilter === 'pending');
             btn.classList.toggle('text-white', statusFilter === 'pending');
-            btn.classList.toggle('bg-gray-50', statusFilter !== 'pending');
-            btn.classList.toggle('text-gray-400', statusFilter !== 'pending');
             render();
         }
 
-        function checkFilter(dateStr, filter) {
-            if (filter === 'all') return true;
-            const d = new Date(dateStr.split('T')[0] + "T12:00:00");
-            const now = new Date();
-            if (filter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-            if (filter === 'year') return d.getFullYear() === now.getFullYear();
-            return true;
-        }
-
-        function getInterest(d) {
+        function getInterestData(d) {
             const start = new Date(d.startDate.split('T')[0] + "T12:00:00");
             const end = new Date(d.payDate.split('T')[0] + "T12:00:00");
             const months = Math.max(0, (end - start) / (1000 * 60 * 60 * 24 * 30));
             const base = Number(d.amount);
             const rate = Number(d.rate) / 100;
-            return base * (rate * months);
+            const calculatedJuros = base * (rate * months);
+            
+            let history = [];
+            try { history = JSON.parse(d.history || "[]"); } catch(e){}
+            const jurosPagos = history.reduce((acc, h) => h.type !== 'amortization' ? acc + Number(h.value) : acc, 0);
+            
+            return {
+                original: calculatedJuros,
+                paid: jurosPagos,
+                remaining: Math.max(0, calculatedJuros - jurosPagos)
+            };
         }
 
         function getWhatsappLink(d) {
-            let history = [];
-            try { history = JSON.parse(d.history || "[]"); } catch(e){}
             const principal = Number(d.amount);
-            const jurosAcumulados = getInterest(d);
-            const totalDue = principal + jurosAcumulados;
+            const interestData = getInterestData(d);
+            const totalDue = principal + interestData.remaining;
             let historyText = "";
+            let history = JSON.parse(d.history || "[]");
             if(history.length > 0) {
-                historyText = "%0A%0A*Histórico de Recebimentos:*";
+                historyText = "%0A%0A*Histórico:*";
                 history.forEach(h => {
                     historyText += `%0A📅 ${formatDate(h.date)}: R$ ${Number(h.value).toFixed(2).replace('.', ',')} (${h.type === 'amortization' ? 'Amort.' : 'Juros'})`;
                 });
             }
-            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20seu%20extrato%20BOLDT%20atualizado:%0A%0A` +
-                         `📌 *Dívida Principal:* ${formatMoney(principal)}%0A` +
-                         `📈 *Juros Acumulados:* ${formatMoney(jurosAcumulados)}%0A` +
+            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20extrato%20Controle%20Boldt:%0A%0A` +
+                         `📌 *Principal:* ${formatMoney(principal)}%0A` +
+                         `📈 *Juros Restantes:* ${formatMoney(interestData.remaining)}%0A` +
                          `💰 *Total para Quitação:* ${formatMoney(totalDue)}` +
                          `${historyText}`;
             return `https://wa.me/?text=${text}`;
@@ -446,58 +407,55 @@
         function render() {
             const tbody = document.getElementById('debtTableBody');
             tbody.innerHTML = '';
-            let pending = 0, overdue = 0, profit = 0;
+            let pendingTotal = 0, overdueTotal = 0, profitTotal = 0;
 
             debts.forEach(d => {
-                let history = [];
-                try { history = JSON.parse(d.history || "[]"); } catch(e){}
-                history.forEach(h => { if(checkFilter(h.date, dateFilter)) profit += Number(h.value); });
+                let history = JSON.parse(d.history || "[]");
+                history.forEach(h => { profitTotal += Number(h.value); });
 
-                if (checkFilter(d.payDate, dateFilter)) {
-                    if (statusFilter === 'pending' && d.status === 'paid') return;
-                    
-                    const amt = Number(d.amount);
-                    const juros = getInterest(d);
-                    const total = amt + juros;
-                    const isPaid = d.status === 'paid';
-                    
-                    const today = new Date(); today.setHours(0,0,0,0);
-                    const venc = new Date(d.payDate.split('T')[0] + "T12:00:00");
-                    const isOver = !isPaid && venc < today;
+                if (statusFilter === 'pending' && d.status === 'paid') return;
+                
+                const amt = Number(d.amount);
+                const interestData = getInterestData(d);
+                const total = amt + interestData.remaining;
+                const isPaid = d.status === 'paid';
+                
+                const today = new Date(); today.setHours(0,0,0,0);
+                const venc = new Date(d.payDate.split('T')[0] + "T12:00:00");
+                const isOver = !isPaid && venc < today;
 
-                    if (!isPaid) { 
-                        pending += total; 
-                        if (isOver) overdue += total; 
-                    }
-
-                    const tr = document.createElement('tr');
-                    tr.className = "group hover:bg-gray-50 transition-all border-b border-gray-50";
-                    tr.innerHTML = `
-                        <td class="px-6 py-5">
-                            <div class="font-black text-sm ${isPaid ? 'text-gray-300' : 'text-black'}">${d.name}</div>
-                            <div class="text-[9px] uppercase font-bold text-gray-400 mt-1">${formatDate(d.payDate)}</div>
-                        </td>
-                        <td class="px-6 py-5 text-right">
-                            <div class="font-black text-sm ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-black')}">${formatMoney(total)}</div>
-                            ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-bold mt-1 tracking-tighter">Princ.: ${formatMoney(amt)} / Jur.: ${formatMoney(juros)}</div>` : ''}
-                        </td>
-                        <td class="px-6 py-5 text-center">
-                            <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <a href="${getWhatsappLink(d)}" target="_blank" class="w-8 h-8 rounded-lg bg-gray-50 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition-all"><i class="fa-brands fa-whatsapp"></i></a>
-                                <button onclick="openPartial('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all"><i class="fa-solid fa-dollar-sign"></i></button>
-                                <button onclick="openEdit('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-8 h-8 rounded-lg bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-check-double"></i></button>
-                                <button onclick="deleteItem('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-red-300 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
+                if (!isPaid) { 
+                    pendingTotal += total; 
+                    if (isOver) overdueTotal += total; 
                 }
+
+                const tr = document.createElement('tr');
+                tr.className = "group hover:bg-gray-50 transition-all border-b border-gray-50";
+                tr.innerHTML = `
+                    <td class="px-6 py-5">
+                        <div class="font-black text-sm ${isPaid ? 'text-gray-300' : 'text-black'}">${d.name}</div>
+                        <div class="text-[9px] uppercase font-bold text-gray-400 mt-1">${formatDate(d.payDate)}</div>
+                    </td>
+                    <td class="px-6 py-5 text-right">
+                        <div class="font-black text-sm ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-black')}">${formatMoney(total)}</div>
+                        ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-bold mt-1">Princ.: ${formatMoney(amt)} / Jur.: ${formatMoney(interestData.remaining)}</div>` : ''}
+                    </td>
+                    <td class="px-6 py-5 text-center">
+                        <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <a href="${getWhatsappLink(d)}" target="_blank" class="w-8 h-8 rounded-lg bg-gray-50 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition-all"><i class="fa-brands fa-whatsapp"></i></a>
+                            <button onclick="openPartial('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all"><i class="fa-solid fa-dollar-sign"></i></button>
+                            <button onclick="openEdit('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-8 h-8 rounded-lg bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-check-double"></i></button>
+                            <button onclick="deleteItem('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-red-300 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
 
-            document.getElementById('displayPending').innerText = formatMoney(pending);
-            document.getElementById('displayOverdue').innerText = formatMoney(overdue);
-            document.getElementById('displayProfit').innerText = formatMoney(profit);
+            document.getElementById('displayPending').innerText = formatMoney(pendingTotal);
+            document.getElementById('displayOverdue').innerText = formatMoney(overdueTotal);
+            document.getElementById('displayProfit').innerText = formatMoney(profitTotal);
             document.getElementById('emptyState').classList.toggle('hidden', tbody.children.length > 0);
         }
     </script>
