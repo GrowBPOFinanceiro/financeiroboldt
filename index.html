@@ -96,11 +96,12 @@
                             <input type="number" id="partialAmount" step="0.01" placeholder="0,00" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
                         </div>
                     </div>
+                    <!-- BOX DE ABATIMENTO PRINCIPAL -->
                     <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 cursor-pointer" onclick="document.getElementById('partialAmortize').click()">
                         <input type="checkbox" id="partialAmortize" class="w-6 h-6 accent-brand-blue cursor-pointer" onclick="event.stopPropagation()">
                         <div>
-                            <span class="text-xs font-bold block">Abater do Principal?</span>
-                            <span class="text-[9px] text-gray-400 uppercase leading-none">Reduz o valor inicial da dívida</span>
+                            <span class="text-xs font-bold block text-brand-black">Abater do Principal?</span>
+                            <span class="text-[9px] text-gray-400 uppercase leading-none">Se marcado, reduz a dívida inicial</span>
                         </div>
                     </div>
                     <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Confirmar Pagamento</button>
@@ -112,7 +113,7 @@
     <!-- TELA LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[200] flex items-center justify-center p-6">
         <div class="w-full max-w-sm text-center">
-            <h1 class="text-4xl font-black text-white mb-2 tracking-tighter italic">BOLDT</h1>
+            <h1 class="text-4xl font-black text-white mb-2 tracking-tighter italic font-serif">BOLDT</h1>
             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">Financial Management</p>
             <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
                 <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/5 text-center text-white rounded-xl py-5 border border-white/10 outline-none focus:border-brand-blue transition-all font-bold tracking-widest">
@@ -170,7 +171,7 @@
                             <div id="displayPending" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
                         <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-red-500">
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Vencidos</span>
+                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Total Vencido</span>
                             <div id="displayOverdue" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
                         <div class="bg-brand-green/10 p-6 rounded-3xl border border-brand-green/20 text-brand-green">
@@ -263,12 +264,14 @@
             }
         }
 
+        // CORREÇÃO: ADICIONADOS HEADERS PARA GARANTIR QUE O COMANDO CHEGUE AO GOOGLE
         async function action(payload) {
             showLoader(true);
             try {
                 const res = await fetch(getApi(), { 
                     method: 'POST', 
-                    redirect: "follow", 
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }, // NECESSÁRIO PARA EVITAR ERRO DE CORS NO POST
                     body: JSON.stringify(payload) 
                 });
                 closeModal('editModal'); 
@@ -296,13 +299,10 @@
                 } 
             });
             e.target.reset();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            document.getElementById('payDate').value = today;
         });
 
         window.deleteItem = (id) => { 
-            if(confirm("Deseja apagar este registro permanentemente?")) {
+            if(confirm("Confirmar exclusão definitiva?")) {
                 action({ action: 'delete', id: String(id) }); 
             }
         };
@@ -357,7 +357,7 @@
                     div.innerHTML = `
                         <div class="flex flex-col">
                             <span class="font-bold text-gray-600">${formatDate(h.date)}</span>
-                            <span class="text-[8px] uppercase font-black ${h.type === 'amortization' ? 'text-brand-blue' : 'text-brand-green'}">${h.type === 'amortization' ? 'Abatimento Principal' : 'Recebimento Juros'}</span>
+                            <span class="text-[8px] uppercase font-black ${h.type === 'amortization' ? 'text-blue-500' : 'text-green-500'}">${h.type === 'amortization' ? 'Abatimento Principal' : 'Recebimento Juros'}</span>
                         </div>
                         <span class="font-black text-brand-black self-center">${formatMoney(Number(h.value))}</span>
                     `;
@@ -374,7 +374,7 @@
                 id: document.getElementById('partialId').value,
                 value: Number(document.getElementById('partialAmount').value),
                 date: document.getElementById('partialDate').value,
-                amortize: document.getElementById('partialAmortize').checked
+                amortize: Boolean(document.getElementById('partialAmortize').checked) // GARANTE ENVIO COMO BOOLEANO
             });
         });
 
@@ -481,7 +481,7 @@
                             <div class="font-black text-sm ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-black')}">${formatMoney(total)}</div>
                             ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-bold mt-1 tracking-tighter">Princ.: ${formatMoney(amt)} / Jur.: ${formatMoney(juros)}</div>` : ''}
                         </td>
-                        <td class="px-6 py-5">
+                        <td class="px-6 py-5 text-center">
                             <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                 <a href="${getWhatsappLink(d)}" target="_blank" class="w-8 h-8 rounded-lg bg-gray-50 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition-all"><i class="fa-brands fa-whatsapp"></i></a>
                                 <button onclick="openPartial('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all"><i class="fa-solid fa-dollar-sign"></i></button>
