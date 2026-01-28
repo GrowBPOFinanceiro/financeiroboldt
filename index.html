@@ -11,222 +11,192 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            black: '#000000',
-                            blue: '#0033CC',
-                            navy: '#0a192f',
-                            gray: '#F5F5F7',
-                            light: '#FFFFFF'
-                        }
+                        brand: { black: '#000000', blue: '#0033CC', navy: '#0a192f', gray: '#F5F5F7', light: '#FFFFFF', green: '#10B981' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .custom-input { transition: all 0.2s ease; border: 1px solid #e5e7eb; }
         .custom-input:focus { border-color: #0033CC; box-shadow: 0 0 0 3px rgba(0, 51, 204, 0.1); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        /* Modal Backdrop */
         .modal-bg { background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+        .filter-btn.active { background-color: #000; color: #fff; border-color: #000; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-brand-gray text-brand-navy flex flex-col min-h-screen">
 
-    <!-- ======================= -->
+    <!-- MODAL: CONFIGURAÇÃO API -->
+    <div id="configModal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <h3 class="text-lg font-black mb-4 uppercase">Configuração API</h3>
+            <p class="text-[10px] text-gray-400 mb-4 uppercase font-bold tracking-widest">Cole a URL do Google Apps Script abaixo.</p>
+            <textarea id="apiUrlInput" rows="3" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-xs mb-4 outline-none" placeholder="https://script.google.com/macros/s/.../exec"></textarea>
+            <button onclick="saveConfig()" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Salvar e Reconectar</button>
+        </div>
+    </div>
+
     <!-- MODAL: EDITAR REGISTRO -->
-    <!-- ======================= -->
     <div id="editModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black text-brand-black uppercase tracking-tight">Editar Registro</h3>
-                <button onclick="closeModal('editModal')" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400">
-                    <i class="fa-solid fa-times"></i>
-                </button>
+                <h3 class="text-lg font-black uppercase">Editar Registro</h3>
+                <button onclick="closeModal('editModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="editForm" class="space-y-4">
                 <input type="hidden" id="editId">
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Cliente</label>
-                    <input type="text" id="editName" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none">
+                <input type="text" id="editName" placeholder="Nome do Cliente" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="editAmount" step="0.01" placeholder="Valor Principal" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
+                    <input type="number" id="editRate" step="0.1" placeholder="Taxa %" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Valor (R$)</label>
-                        <input type="number" id="editAmount" step="0.01" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Taxa (%)</label>
-                        <input type="number" id="editRate" step="0.1" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none">
-                    </div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Início</label><input type="date" id="editStart" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold"></div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Vencimento</label><input type="date" id="editPay" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-xs font-bold"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Data Início</label>
-                        <input type="date" id="editStart" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-gray-50 text-xs font-bold text-brand-black outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Vencimento</label>
-                        <input type="date" id="editPay" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-gray-50 text-xs font-bold text-brand-black outline-none">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-brand-black hover:bg-brand-blue text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-[0.99] transition-all text-xs uppercase tracking-[0.2em] mt-2">
-                    Salvar Alterações
-                </button>
+                <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Salvar Alterações</button>
             </form>
         </div>
     </div>
 
-    <!-- ======================= -->
     <!-- MODAL: BAIXA PARCIAL -->
-    <!-- ======================= -->
     <div id="partialModal" class="fixed inset-0 modal-bg z-[80] hidden flex items-center justify-center p-4 fade-in">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black text-brand-black uppercase tracking-tight">Abater Valor</h3>
-                <button onclick="closeModal('partialModal')" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400">
-                    <i class="fa-solid fa-times"></i>
-                </button>
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-black uppercase">Novo Pagamento</h3>
+                <button onclick="closeModal('partialModal')" class="text-gray-400"><i class="fa-solid fa-times"></i></button>
             </div>
-            <div class="bg-blue-50 p-4 rounded-xl mb-6">
-                <p class="text-[10px] text-blue-800 uppercase font-bold tracking-wide mb-1">Dívida Atual</p>
-                <p id="partialCurrentDebt" class="text-2xl font-black text-brand-blue">R$ 0,00</p>
-            </div>
-            <form id="partialForm" class="space-y-4">
-                <input type="hidden" id="partialId">
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Valor a Abater (R$)</label>
-                    <input type="number" id="partialAmount" step="0.01" required placeholder="Ex: 50,00" class="custom-input w-full px-4 py-4 text-center rounded-xl bg-gray-50 text-xl font-black text-brand-black outline-none border-brand-blue">
+            
+            <div class="overflow-y-auto custom-scrollbar pr-1">
+                <div class="bg-blue-50 p-4 rounded-xl mb-4">
+                    <p class="text-[10px] text-blue-800 uppercase font-bold mb-1 tracking-wider">Dívida Principal Atual</p>
+                    <p id="partialCurrentDebt" class="text-2xl font-black text-brand-blue">R$ 0,00</p>
                 </div>
-                <button type="submit" class="w-full bg-brand-blue hover:bg-black text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-[0.99] transition-all text-xs uppercase tracking-[0.2em]">
-                    Confirmar Baixa
-                </button>
-            </form>
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1">Histórico</p>
+                    <div id="historyList" class="space-y-2 max-h-32 overflow-y-auto"></div>
+                </div>
+                <form id="partialForm" class="space-y-4">
+                    <input type="hidden" id="partialId">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Data Pagto</label>
+                            <input type="date" id="partialDate" required class="custom-input w-full px-2 py-3 rounded-xl bg-gray-50 text-xs font-bold">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold uppercase text-gray-400 pl-1">Valor</label>
+                            <input type="number" id="partialAmount" step="0.01" placeholder="0,00" required class="custom-input w-full px-3 py-3 rounded-xl bg-gray-50 text-lg font-black">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 cursor-pointer" onclick="document.getElementById('partialAmortize').click()">
+                        <input type="checkbox" id="partialAmortize" class="w-6 h-6 accent-brand-blue cursor-pointer" onclick="event.stopPropagation()">
+                        <div>
+                            <span class="text-xs font-bold block">Abater do Principal?</span>
+                            <span class="text-[9px] text-gray-400 uppercase leading-none">Reduz o valor inicial da dívida</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Confirmar Pagamento</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- TELA LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[60] flex items-center justify-center p-6">
-        <div class="w-full max-w-sm fade-in text-center">
-            <div class="inline-block p-4 rounded-full bg-white/10 mb-8 backdrop-blur-md">
-                <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
-            </div>
-            <h1 class="text-3xl font-black text-white tracking-tighter mb-2">BOLDT</h1>
-            <p class="text-gray-400 text-xs font-medium uppercase tracking-[0.2em] mb-10">Acesso Seguro</p>
-            
+    <div id="loginScreen" class="fixed inset-0 bg-brand-black z-[200] flex items-center justify-center p-6">
+        <div class="w-full max-w-sm text-center">
+            <h1 class="text-4xl font-black text-white mb-2 tracking-tighter italic">BOLDT</h1>
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">Financial Management</p>
             <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
-                <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/10 border border-white/20 text-center text-white placeholder-white/30 rounded-xl px-4 py-4 focus:bg-white/20 focus:border-brand-blue outline-none transition font-bold tracking-widest text-lg">
-                <button type="submit" class="w-full bg-brand-blue hover:bg-white hover:text-brand-blue text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/50 transform active:scale-[0.98] transition-all text-xs uppercase tracking-[0.15em]">Entrar</button>
+                <input type="password" id="passwordInput" placeholder="Chave de Acesso" class="w-full bg-white/5 text-center text-white rounded-xl py-5 border border-white/10 outline-none focus:border-brand-blue transition-all font-bold tracking-widest">
+                <button type="submit" class="w-full bg-brand-blue text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-white hover:text-brand-blue transition-all">Entrar</button>
             </form>
-            <p id="errorMsg" class="mt-4 text-brand-blue text-xs font-bold uppercase hidden">Senha Incorreta</p>
+            <p id="errorMsg" class="mt-4 text-brand-blue text-[10px] font-bold hidden uppercase tracking-widest">Acesso Negado</p>
         </div>
     </div>
 
-    <!-- SISTEMA -->
-    <div id="appContent" class="hidden flex-col min-h-screen w-full">
-        <nav class="bg-white border-b border-gray-100 sticky top-0 z-40 backdrop-blur-md bg-white/80">
-            <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-brand-black rounded flex items-center justify-center text-white"><span class="font-black text-xs">B</span></div>
-                    <span class="font-bold tracking-tight text-brand-black">BOLDT</span>
-                </div>
-                <button onclick="logout()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-brand-black"><i class="fa-solid fa-power-off text-xs"></i></button>
+    <!-- APP CONTENT -->
+    <div id="appContent" class="hidden flex-col min-h-screen">
+        <nav class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-40 backdrop-blur-md bg-white/80">
+            <div class="flex items-center gap-2 font-black tracking-tighter italic text-xl">
+                <div class="bg-black text-white px-2 py-0.5 rounded italic">B</div> BOLDT
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openConfig()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-all"><i class="fa-solid fa-gear text-xs"></i></button>
+                <button onclick="logout()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-power-off text-xs"></i></button>
             </div>
         </nav>
 
-        <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
-            <div class="lg:hidden mb-8">
-                <h2 class="text-2xl font-black text-brand-black mb-1">Visão Geral</h2>
-                <p class="text-gray-400 text-xs font-medium">Gestão de Ativos e Recebíveis</p>
+        <main class="p-4 container mx-auto max-w-6xl">
+            <!-- FILTROS -->
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                <button onclick="setDateFilter('month')" class="filter-btn active px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-month">Mês Atual</button>
+                <button onclick="setDateFilter('year')" class="filter-btn px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-year">Ano</button>
+                <button onclick="setDateFilter('all')" class="filter-btn px-6 py-2.5 rounded-full bg-white border border-gray-100 text-[10px] font-bold uppercase tracking-widest transition-all" id="btn-all">Todo Período</button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <!-- FORM -->
-                <div class="lg:col-span-4 order-2 lg:order-1">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xs font-black text-brand-black uppercase tracking-wider">Novo Registro</h3>
-                            <div class="w-2 h-2 rounded-full bg-brand-blue"></div>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- FORMULÁRIO -->
+                <div class="lg:col-span-4">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
+                        <h3 class="text-[10px] font-black uppercase mb-6 tracking-[0.2em] text-gray-400">Novo Lançamento</h3>
                         <form id="debtForm" class="space-y-4">
-                            <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Cliente</label>
-                                <input type="text" id="name" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none placeholder-gray-300" placeholder="Nome completo">
+                            <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Cliente</label><input type="text" id="name" placeholder="Nome completo" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Valor Principal</label><input type="number" id="amount" step="0.01" placeholder="0,00" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
+                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Taxa (%)</label><input type="number" id="rate" placeholder="7" value="7" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 font-bold text-sm"></div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Valor Principal</label>
-                                <input type="number" id="amount" step="0.01" required class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none" placeholder="0,00">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Data Inicial</label><input type="date" id="startDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold"></div>
+                                <div><label class="text-[9px] font-bold uppercase text-gray-400 pl-1 mb-1 block">Vencimento</label><input type="date" id="payDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold"></div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Taxa (%) - Juros Simples</label>
-                                <input type="number" id="rate" value="5" class="custom-input w-full px-4 py-3 rounded-xl bg-gray-50 text-sm font-bold text-brand-black outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 pt-2">
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Data Início</label>
-                                    <input type="date" id="startDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold text-brand-black outline-none uppercase">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1 block">Vencimento</label>
-                                    <input type="date" id="payDate" required class="custom-input w-full px-3 py-2.5 rounded-xl bg-white border-gray-200 text-xs font-bold text-brand-black outline-none uppercase">
-                                </div>
-                            </div>
-                            <button type="submit" class="w-full bg-brand-black hover:bg-brand-blue text-white font-bold py-4 rounded-xl shadow-xl transform active:scale-[0.98] transition-all text-xs uppercase tracking-[0.2em] mt-2">Registrar</button>
+                            <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs tracking-[0.2em] hover:bg-brand-blue transition-all shadow-lg shadow-gray-200">Registrar</button>
                         </form>
                     </div>
                 </div>
 
-                <!-- LISTA -->
-                <div class="lg:col-span-8 order-1 lg:order-2">
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-brand-blue rounded-2xl p-6 text-white shadow-lg shadow-blue-900/20 relative overflow-hidden">
-                            <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl font-black">R$</div>
-                            <div class="relative z-10">
-                                <span class="text-[10px] font-bold uppercase tracking-widest opacity-80 block mb-2">Total a Receber</span>
-                                <span id="displayPending" class="text-2xl lg:text-3xl font-black tracking-tight">R$ 0,00</span>
-                            </div>
+                <!-- DASHBOARD -->
+                <div class="lg:col-span-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-brand-blue p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
+                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-70">Previsão de Recebimento</span>
+                            <div id="displayPending" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
-                        <div class="bg-white border border-gray-100 rounded-2xl p-6 text-brand-black shadow-sm relative overflow-hidden">
-                            <div class="relative z-10">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">Vencidos / Atrasados</span>
-                                <span id="displayOverdue" class="text-2xl lg:text-3xl font-black tracking-tight">R$ 0,00</span>
-                            </div>
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-red-500">
+                            <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Vencidos</span>
+                            <div id="displayOverdue" class="text-2xl font-black mt-1">R$ 0,00</div>
+                        </div>
+                        <div class="bg-brand-green/10 p-6 rounded-3xl border border-brand-green/20 text-brand-green">
+                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-80">Lucro Realizado</span>
+                            <div id="displayProfit" class="text-2xl font-black mt-1">R$ 0,00</div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[500px] flex flex-col">
-                        <div class="p-5 border-b border-gray-50 flex items-center justify-between gap-4">
-                            <h3 class="text-xs font-black text-brand-black uppercase tracking-wider">Carteira de Clientes</h3>
-                            <div class="flex gap-2">
-                                <button onclick="setFilter('all')" class="filter-chip active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border border-transparent transition" data-f="all">Tudo</button>
-                                <button onclick="setFilter('pending')" class="filter-chip px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border border-transparent transition" data-f="pending">Abertos</button>
-                                <button onclick="setFilter('paid')" class="filter-chip px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border border-transparent transition" data-f="paid">Baixados</button>
-                            </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-50 flex justify-between items-center">
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Carteira Ativa</h3>
+                            <button onclick="setStatusFilter('pending')" id="chip-pending" class="text-[9px] font-bold uppercase px-4 py-2 rounded-full bg-gray-50 text-gray-400 transition-all">Ver somente abertos</button>
                         </div>
-                        <div class="overflow-x-auto flex-grow">
+                        <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
-                                <thead class="bg-gray-50/50 text-[9px] uppercase tracking-widest text-gray-400 font-bold">
+                                <thead class="bg-gray-50/50 text-[9px] uppercase font-bold text-gray-400 tracking-widest">
                                     <tr>
-                                        <th class="px-6 py-4">Cliente</th>
-                                        <th class="px-6 py-4 text-right">Valor Atual</th>
-                                        <th class="px-6 py-4 text-center">Status</th>
-                                        <th class="px-6 py-4 text-center">Ações</th>
+                                        <th class="px-6 py-5">Cliente / Vencimento</th>
+                                        <th class="px-6 py-5 text-right">Saldo Atualizado</th>
+                                        <th class="px-6 py-5 text-center">Gestão</th>
                                     </tr>
                                 </thead>
                                 <tbody id="debtTableBody" class="divide-y divide-gray-50"></tbody>
                             </table>
                         </div>
-                        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20">
-                            <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 text-gray-300"><i class="fa-solid fa-folder-open text-2xl"></i></div>
-                            <span class="text-xs font-bold text-gray-300 uppercase tracking-widest">Sem registros</span>
-                        </div>
+                        <div id="emptyState" class="hidden py-32 text-center text-gray-300 uppercase font-black text-xs tracking-widest">Nenhum registro encontrado</div>
                     </div>
                 </div>
             </div>
@@ -234,268 +204,302 @@
     </div>
 
     <!-- LOADER -->
-    <div id="globalLoader" class="fixed inset-0 bg-white/80 z-[90] flex flex-col items-center justify-center backdrop-blur-sm hidden">
-        <div class="w-12 h-12 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin mb-4"></div>
-        <span class="text-[10px] font-bold text-brand-black uppercase tracking-widest animate-pulse">Processando</span>
+    <div id="globalLoader" class="fixed inset-0 bg-white/90 z-[300] hidden flex flex-col items-center justify-center backdrop-blur-md">
+        <div class="w-12 h-12 border-[6px] border-gray-100 border-t-brand-blue rounded-full animate-spin"></div>
+        <p class="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sincronizando</p>
     </div>
 
     <script>
-        // CONFIGURAÇÃO
-        // URL ATUALIZADA - BOLDT 2.0
         const API_URL = "https://script.google.com/macros/s/AKfycbwIpjP6OYRHaWUIZMqX5R8Kez-shL3gO8wpfqRXZEWNzvLKRSz6XrnDxip9sYZHWQqPQw/exec";
-        
         let debts = [];
-        let currentFilter = 'all';
+        let dateFilter = 'month';
+        let statusFilter = 'all';
 
-        // AUTH
+        function getApi() { return localStorage.getItem('boldt_api_url') || API_URL; }
+        function saveConfig() { const u = document.getElementById('apiUrlInput').value.trim(); if(u){ localStorage.setItem('boldt_api_url', u); location.reload(); }}
+        function openConfig() { document.getElementById('apiUrlInput').value = getApi(); document.getElementById('configModal').classList.remove('hidden'); }
+        function showLoader(v) { document.getElementById('globalLoader').classList.toggle('hidden', !v); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // LOGIN
         function checkLogin() {
             if (document.getElementById('passwordInput').value === 'boldt') {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContent').classList.remove('hidden');
-                document.getElementById('appContent').classList.add('flex', 'fade-in');
+                document.getElementById('appContent').classList.add('flex');
                 localStorage.setItem('boldt_session', 'active');
-                initSystem();
-            } else document.getElementById('errorMsg').classList.remove('hidden');
+                init();
+            } else {
+                document.getElementById('errorMsg').classList.remove('hidden');
+                setTimeout(() => document.getElementById('errorMsg').classList.add('hidden'), 3000);
+            }
         }
         function logout() { localStorage.removeItem('boldt_session'); location.reload(); }
         if (localStorage.getItem('boldt_session') === 'active') {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appContent').classList.remove('hidden');
             document.getElementById('appContent').classList.add('flex');
-            initSystem();
+            init();
         }
 
-        // SYSTEM
-        function initSystem() {
+        function init() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('payDate').value = today;
-            fetchDebts();
+            load();
         }
 
-        async function fetchDebts() {
+        async function load() {
             showLoader(true);
             try {
-                const res = await fetch(API_URL);
-                const text = await res.text();
-                
-                try {
-                    const data = JSON.parse(text);
-                    if (Array.isArray(data)) debts = data;
-                    render();
-                } catch(e) {
-                    console.error("Resposta inválida (GET):", text);
-                    // Não alertar no GET para não travar a UX, mas logar
-                }
-            } catch (e) { console.error(e); } finally { showLoader(false); }
+                const res = await fetch(`${getApi()}?t=${Date.now()}`);
+                const data = await res.json();
+                if (Array.isArray(data)) debts = data;
+                render();
+            } catch (e) { 
+                console.error("Erro no carregamento:", e); 
+            } finally { 
+                showLoader(false); 
+            }
         }
 
-        // ACTIONS
-        async function apiAction(payload) {
+        async function action(payload) {
             showLoader(true);
             try {
-                // ATENÇÃO: Headers configurados para evitar bloqueio CORS do Google Script
-                const res = await fetch(API_URL, { 
+                const res = await fetch(getApi(), { 
                     method: 'POST', 
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    redirect: "follow", 
                     body: JSON.stringify(payload) 
                 });
-                
-                const text = await res.text();
-                
-                // Tenta ler o JSON de resposta
-                try {
-                    const json = JSON.parse(text);
-                    console.log("Resposta do servidor:", json);
-                } catch (parseError) {
-                    console.error("Erro de Parsing:", text);
-                    throw new Error("O sistema recebeu uma resposta inválida do servidor. Provavelmente o Script não foi atualizado ('Nova Versão') ou as permissões estão erradas.");
-                }
-                
-                // Sucesso
-                document.getElementById('debtForm').reset();
-                closeModal('editModal');
+                closeModal('editModal'); 
                 closeModal('partialModal');
-                initSystem(); // Reseta datas
-                await fetchDebts(); // Recarrega lista
-                
+                setTimeout(load, 1500);
             } catch (e) { 
-                console.error("Erro na API:", e);
-                alert("Falha na operação: " + e.message); 
-            } finally { showLoader(false); }
+                alert("Falha na operação: verifique sua conexão."); 
+                showLoader(false); 
+            }
         }
 
-        // Create
-        document.getElementById('debtForm').addEventListener('submit', (e) => {
+        // CRUD
+        document.getElementById('debtForm').addEventListener('submit', e => {
             e.preventDefault();
-            console.log("Registrando novo...");
-            apiAction({ 
+            action({ 
                 action: 'create', 
                 data: { 
                     name: document.getElementById('name').value, 
-                    amount: document.getElementById('amount').value, 
-                    rate: document.getElementById('rate').value, 
+                    amount: Number(document.getElementById('amount').value), 
+                    rate: Number(document.getElementById('rate').value), 
                     startDate: document.getElementById('startDate').value, 
-                    payDate: document.getElementById('payDate').value,
+                    payDate: document.getElementById('payDate').value, 
                     id: 'ID'+Date.now(), 
                     status: 'pending' 
                 } 
             });
+            e.target.reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('payDate').value = today;
         });
 
-        // Edit
+        window.deleteItem = (id) => { 
+            if(confirm("Deseja apagar este registro permanentemente?")) {
+                action({ action: 'delete', id: String(id) }); 
+            }
+        };
+        
         window.openEdit = (id) => {
-            const d = debts.find(x => x.id == id);
+            const d = debts.find(x => String(x.id) === String(id));
             if(!d) return;
             document.getElementById('editId').value = d.id;
             document.getElementById('editName').value = d.name;
-            document.getElementById('editAmount').value = d.amount;
-            document.getElementById('editRate').value = d.rate;
-            document.getElementById('editStart').value = formatDateVal(d.startDate);
-            document.getElementById('editPay').value = formatDateVal(d.payDate);
+            document.getElementById('editAmount').value = Number(d.amount);
+            document.getElementById('editRate').value = Number(d.rate);
+            document.getElementById('editStart').value = d.startDate.split('T')[0];
+            document.getElementById('editPay').value = d.payDate.split('T')[0];
             document.getElementById('editModal').classList.remove('hidden');
         };
-        
-        document.getElementById('editForm').addEventListener('submit', (e) => {
+
+        document.getElementById('editForm').addEventListener('submit', e => {
             e.preventDefault();
-            apiAction({
-                action: 'update',
-                data: {
-                    id: document.getElementById('editId').value,
-                    name: document.getElementById('editName').value,
-                    amount: document.getElementById('editAmount').value,
-                    rate: document.getElementById('editRate').value,
-                    startDate: document.getElementById('editStart').value,
-                    payDate: document.getElementById('editPay').value
-                }
+            action({ 
+                action: 'update', 
+                data: { 
+                    id: document.getElementById('editId').value, 
+                    name: document.getElementById('editName').value, 
+                    amount: Number(document.getElementById('editAmount').value), 
+                    rate: Number(document.getElementById('editRate').value), 
+                    startDate: document.getElementById('editStart').value, 
+                    payDate: document.getElementById('editPay').value 
+                } 
             });
         });
 
-        // Partial
         window.openPartial = (id) => {
-            const d = debts.find(x => x.id == id);
+            const d = debts.find(x => String(x.id) === String(id));
             if(!d) return;
             document.getElementById('partialId').value = d.id;
-            document.getElementById('partialCurrentDebt').innerText = formatMoney(calculate(d));
+            document.getElementById('partialCurrentDebt').innerText = formatMoney(Number(d.amount));
+            document.getElementById('partialDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('partialAmortize').checked = false;
             document.getElementById('partialAmount').value = '';
+            
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            let history = [];
+            try { history = JSON.parse(d.history || "[]"); } catch(e){}
+            
+            if(history.length === 0) {
+                list.innerHTML = '<p class="text-[9px] text-gray-300 uppercase text-center py-2">Sem histórico</p>';
+            } else {
+                history.forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between text-[10px] bg-gray-50 p-3 rounded-xl border border-gray-100";
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-600">${formatDate(h.date)}</span>
+                            <span class="text-[8px] uppercase font-black ${h.type === 'amortization' ? 'text-brand-blue' : 'text-brand-green'}">${h.type === 'amortization' ? 'Abatimento Principal' : 'Recebimento Juros'}</span>
+                        </div>
+                        <span class="font-black text-brand-black self-center">${formatMoney(Number(h.value))}</span>
+                    `;
+                    list.appendChild(div);
+                });
+            }
             document.getElementById('partialModal').classList.remove('hidden');
         };
 
-        document.getElementById('partialForm').addEventListener('submit', (e) => {
+        document.getElementById('partialForm').addEventListener('submit', e => {
             e.preventDefault();
-            apiAction({
+            action({
                 action: 'partial',
                 id: document.getElementById('partialId').value,
-                value: document.getElementById('partialAmount').value
+                value: Number(document.getElementById('partialAmount').value),
+                date: document.getElementById('partialDate').value,
+                amortize: document.getElementById('partialAmortize').checked
             });
         });
 
-        // Utils
-        window.deleteItem = (id) => { if(confirm("Apagar registro?")) apiAction({ action: 'delete', id }); };
-        window.updateStatus = (id, s) => { apiAction({ action: 'updateStatus', id, status: s === 'paid' ? 'pending' : 'paid' }); };
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        window.updateStatus = (id, s) => {
+            const newStatus = s === 'paid' ? 'pending' : 'paid';
+            action({ action: 'updateStatus', id, status: newStatus });
+        };
 
-        // CALC & RENDER
-        function calculate(d) {
-            // JUROS SIMPLES APENAS
-            const start = new Date(d.startDate);
-            const end = new Date(d.payDate);
-            const days = Math.ceil(Math.abs(end - start) / (86400000));
-            const months = Math.max(0, days / 30);
-            const rate = parseFloat(d.rate) / 100;
-            const amt = parseFloat(d.amount);
-            return amt * (1 + (rate * months));
+        // CALCULOS
+        function formatMoney(v) { return Number(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
+        function formatDate(s) { if(!s) return '-'; const p = s.split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+
+        function setDateFilter(f) {
+            dateFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-black', 'text-white'));
+            document.getElementById('btn-'+f).classList.add('active', 'bg-black', 'text-white');
+            render();
+        }
+
+        function setStatusFilter(s) {
+            statusFilter = s === statusFilter ? 'all' : s;
+            const btn = document.getElementById('chip-pending');
+            btn.classList.toggle('bg-blue-500', statusFilter === 'pending');
+            btn.classList.toggle('text-white', statusFilter === 'pending');
+            btn.classList.toggle('bg-gray-50', statusFilter !== 'pending');
+            btn.classList.toggle('text-gray-400', statusFilter !== 'pending');
+            render();
+        }
+
+        function checkFilter(dateStr, filter) {
+            if (filter === 'all') return true;
+            const d = new Date(dateStr.split('T')[0] + "T12:00:00");
+            const now = new Date();
+            if (filter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            if (filter === 'year') return d.getFullYear() === now.getFullYear();
+            return true;
+        }
+
+        function getInterest(d) {
+            const start = new Date(d.startDate.split('T')[0] + "T12:00:00");
+            const end = new Date(d.payDate.split('T')[0] + "T12:00:00");
+            const months = Math.max(0, (end - start) / (1000 * 60 * 60 * 24 * 30));
+            const base = Number(d.amount);
+            const rate = Number(d.rate) / 100;
+            return base * (rate * months);
+        }
+
+        function getWhatsappLink(d) {
+            let history = [];
+            try { history = JSON.parse(d.history || "[]"); } catch(e){}
+            const principal = Number(d.amount);
+            const jurosAcumulados = getInterest(d);
+            const totalDue = principal + jurosAcumulados;
+            let historyText = "";
+            if(history.length > 0) {
+                historyText = "%0A%0A*Histórico de Recebimentos:*";
+                history.forEach(h => {
+                    historyText += `%0A📅 ${formatDate(h.date)}: R$ ${Number(h.value).toFixed(2).replace('.', ',')} (${h.type === 'amortization' ? 'Amort.' : 'Juros'})`;
+                });
+            }
+            const text = `Ol%C3%A1%20*${encodeURIComponent(d.name)}*,%20seu%20extrato%20BOLDT%20atualizado:%0A%0A` +
+                         `📌 *Dívida Principal:* ${formatMoney(principal)}%0A` +
+                         `📈 *Juros Acumulados:* ${formatMoney(jurosAcumulados)}%0A` +
+                         `💰 *Total para Quitação:* ${formatMoney(totalDue)}` +
+                         `${historyText}`;
+            return `https://wa.me/?text=${text}`;
         }
 
         function render() {
             const tbody = document.getElementById('debtTableBody');
             tbody.innerHTML = '';
-            let pTotal = 0, oTotal = 0;
+            let pending = 0, overdue = 0, profit = 0;
 
-            const filtered = debts
-                .sort((a,b) => new Date(a.payDate) - new Date(b.payDate))
-                .filter(d => {
+            debts.forEach(d => {
+                let history = [];
+                try { history = JSON.parse(d.history || "[]"); } catch(e){}
+                history.forEach(h => { if(checkFilter(h.date, dateFilter)) profit += Number(h.value); });
+
+                if (checkFilter(d.payDate, dateFilter)) {
+                    if (statusFilter === 'pending' && d.status === 'paid') return;
+                    
+                    const amt = Number(d.amount);
+                    const juros = getInterest(d);
+                    const total = amt + juros;
                     const isPaid = d.status === 'paid';
-                    const isOver = !isPaid && new Date(d.payDate) < new Date();
-                    const val = calculate(d);
-                    if (!isPaid) { pTotal += val; if (isOver) oTotal += val; }
-                    if (currentFilter === 'all') return true;
-                    if (currentFilter === 'pending') return !isPaid;
-                    if (currentFilter === 'paid') return isPaid;
-                    return false;
-                });
+                    
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const venc = new Date(d.payDate.split('T')[0] + "T12:00:00");
+                    const isOver = !isPaid && venc < today;
 
-            if(filtered.length === 0) document.getElementById('emptyState').classList.remove('hidden');
-            else document.getElementById('emptyState').classList.add('hidden');
+                    if (!isPaid) { 
+                        pending += total; 
+                        if (isOver) overdue += total; 
+                    }
 
-            filtered.forEach(d => {
-                const total = calculate(d);
-                const isPaid = d.status === 'paid';
-                const isOver = !isPaid && new Date(d.payDate) < new Date();
-                
-                let rowClass = "group hover:bg-gray-50 transition border-b border-gray-50";
-                let statusBadge = isPaid 
-                    ? `<span class="inline-flex items-center px-2.5 py-1 rounded bg-black text-white text-[9px] font-bold uppercase"><i class="fa-solid fa-check mr-1.5"></i> Pago</span>`
-                    : (isOver 
-                        ? `<span class="inline-flex items-center px-2.5 py-1 rounded bg-brand-blue text-white text-[9px] font-bold uppercase"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> Vencido</span>`
-                        : `<span class="inline-flex items-center px-2.5 py-1 rounded border border-gray-200 text-gray-500 text-[9px] font-bold uppercase">Aberto</span>`);
-
-                const tr = document.createElement('tr');
-                tr.className = rowClass;
-                tr.innerHTML = `
-                    <td class="px-6 py-4">
-                        <div class="${isPaid ? 'text-gray-400' : 'text-brand-black'} font-bold text-sm mb-0.5">${d.name}</div>
-                        <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">${formatDate(d.payDate)}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-mono text-sm font-bold ${isPaid ? 'text-gray-400 line-through' : (isOver ? 'text-brand-blue' : 'text-brand-black')}">
-                        ${formatMoney(total)}
-                    </td>
-                    <td class="px-6 py-4 text-center">${statusBadge}</td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                             <a href="https://wa.me/?text=Ol%C3%A1%20${encodeURIComponent(d.name)},%20seu%20d%C3%A9bito%20atualizado%20%C3%A9%20${encodeURIComponent(formatMoney(total))}" target="_blank" class="w-8 h-8 flex items-center justify-center rounded bg-brand-black text-white hover:bg-green-600 transition"><i class="fa-brands fa-whatsapp"></i></a>
-                             <button onclick="openPartial('${d.id}')" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-600 transition" title="Abater Valor"><i class="fa-solid fa-hand-holding-dollar"></i></button>
-                             <button onclick="openEdit('${d.id}')" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-brand-blue hover:border-brand-blue transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                             <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-brand-black hover:border-brand-black transition" title="Baixar"><i class="fa-solid fa-check"></i></button>
-                             <button onclick="deleteItem('${d.id}')" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-600 transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            document.getElementById('displayPending').innerText = formatMoney(pTotal);
-            document.getElementById('displayOverdue').innerText = formatMoney(oTotal);
-        }
-
-        function formatMoney(v) { return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
-        function formatDate(s) { 
-             if(!s) return '-';
-             let d = s;
-             if(typeof s === 'string' && s.includes('T')) d = s.split('T')[0];
-             return new Date(d).toLocaleDateString('pt-BR');
-        }
-        function formatDateVal(s) {
-            if(!s) return '';
-            let d = s;
-            if(typeof s === 'string' && s.includes('T')) d = s.split('T')[0];
-            return new Date(d).toISOString().split('T')[0];
-        }
-
-        // INIT STYLE
-        function setFilter(f) {
-            currentFilter = f;
-            document.querySelectorAll('.filter-chip').forEach(b => {
-                b.classList.remove('bg-brand-black', 'text-white', 'shadow-lg');
-                b.classList.add('text-gray-400', 'hover:text-brand-black');
-                if(b.dataset.f === f) {
-                    b.classList.remove('text-gray-400', 'hover:text-brand-black');
-                    b.classList.add('bg-brand-black', 'text-white', 'shadow-lg');
+                    const tr = document.createElement('tr');
+                    tr.className = "group hover:bg-gray-50 transition-all border-b border-gray-50";
+                    tr.innerHTML = `
+                        <td class="px-6 py-5">
+                            <div class="font-black text-sm ${isPaid ? 'text-gray-300' : 'text-black'}">${d.name}</div>
+                            <div class="text-[9px] uppercase font-bold text-gray-400 mt-1">${formatDate(d.payDate)}</div>
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            <div class="font-black text-sm ${isPaid ? 'text-gray-300' : (isOver ? 'text-red-500' : 'text-black')}">${formatMoney(total)}</div>
+                            ${!isPaid ? `<div class="text-[8px] text-gray-400 uppercase font-bold mt-1 tracking-tighter">Princ.: ${formatMoney(amt)} / Jur.: ${formatMoney(juros)}</div>` : ''}
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                <a href="${getWhatsappLink(d)}" target="_blank" class="w-8 h-8 rounded-lg bg-gray-50 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition-all"><i class="fa-brands fa-whatsapp"></i></a>
+                                <button onclick="openPartial('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-brand-blue hover:bg-brand-blue hover:text-white transition-all"><i class="fa-solid fa-dollar-sign"></i></button>
+                                <button onclick="openEdit('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="updateStatus('${d.id}', '${d.status}')" class="w-8 h-8 rounded-lg bg-gray-50 ${isPaid ? 'text-black' : 'text-gray-300'} hover:bg-black hover:text-white transition-all"><i class="fa-solid fa-check-double"></i></button>
+                                <button onclick="deleteItem('${d.id}')" class="w-8 h-8 rounded-lg bg-gray-50 text-red-300 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
                 }
             });
-            render();
-        }
-        setFilter('all');
 
+            document.getElementById('displayPending').innerText = formatMoney(pending);
+            document.getElementById('displayOverdue').innerText = formatMoney(overdue);
+            document.getElementById('displayProfit').innerText = formatMoney(profit);
+            document.getElementById('emptyState').classList.toggle('hidden', tbody.children.length > 0);
+        }
     </script>
 </body>
 </html>
