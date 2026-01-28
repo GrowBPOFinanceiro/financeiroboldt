@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ACESSO RESTRITO - BOLDT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Ocultar conteúdo até logar */
+        #appContent { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 flex flex-col min-h-screen">
+
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center fade-in relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-blue-900"></div>
+            
+            <div class="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900">
+                <i class="fa-solid fa-lock text-2xl"></i>
+            </div>
+
+            <h2 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">Área Restrita</h2>
+            <p class="text-slate-500 mb-6 text-xs font-medium uppercase tracking-wide">Identifique-se para acessar</p>
+            
+            <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
+                <input type="password" id="passwordInput" placeholder="Chave de Acesso" 
+                    class="w-full text-center px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:border-blue-900 focus:bg-white outline-none text-slate-900 font-bold tracking-widest transition-colors placeholder:font-normal placeholder:tracking-normal">
+                
+                <button type="submit" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-3.5 rounded-lg shadow-lg transform active:scale-[0.98] transition-all text-sm uppercase tracking-widest">
+                    Entrar
+                </button>
+            </form>
+            <p id="errorMsg" class="mt-4 text-red-600 text-[10px] font-bold uppercase tracking-wide hidden">Senha Incorreta</p>
+        </div>
+    </div>
+
+    <div id="globalLoader" class="fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center hidden backdrop-blur-sm">
+        <div class="flex flex-col items-center animate-pulse">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-900 mb-4"></i>
+            <p class="text-slate-900 font-black uppercase tracking-[0.2em] text-xs">Sincronizando...</p>
+        </div>
+    </div>
+
+    <div id="appContent" class="flex-col min-h-screen w-full">
+        
+        <header class="bg-black text-white shadow-xl sticky top-0 z-30 border-b border-gray-800">
+            <div class="container mx-auto px-5 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-chart-pie text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black tracking-tighter uppercase text-white leading-none">BOLDT</h1>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Gestão Financeira</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-xs text-gray-400 hover:text-white uppercase font-bold tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+            <div class="lg:hidden grid grid-cols-2 gap-3 mb-6">
+                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">A Receber</span>
+                    <span id="mobilePending" class="text-lg font-black text-slate-900 block">R$ 0,00</span>
+                 </div>
+                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center border-l-4 border-l-red-500">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Atrasado</span>
+                    <span id="mobileOverdue" class="text-lg font-black text-red-600 block">R$ 0,00</span>
+                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sticky top-24">
+                        <h2 class="text-xs font-black mb-5 text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-plus-circle text-blue-900"></i> Novo Lançamento
+                        </h2>
+                        <form id="debtForm" class="space-y-4">
+                            <input type="text" id="name" required placeholder="Nome do Cliente" class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:border-blue-900 outline-none">
+                            <input type="number" id="amount" step="0.01" required placeholder="Valor (R$)" class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:border-blue-900 outline-none">
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" id="rate" placeholder="Taxa %" value="5" class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:border-blue-900 outline-none">
+                                <select id="interestType" class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:border-blue-900 outline-none">
+                                    <option value="simple">Simples</option>
+                                    <option value="compound">Composto</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Início</label>
+                                    <input type="date" id="startDate" required class="input-field w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:border-blue-900 outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Vencimento</label>
+                                    <input type="date" id="payDate" required class="input-field w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:border-blue-900 outline-none">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-3 rounded-lg shadow-md transform active:scale-[0.98] transition-all text-xs uppercase tracking-widest mt-2">
+                                Registrar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                        <button onclick="setFilter('all')" class="filter-btn active flex-1 bg-white border border-slate-200 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:border-blue-900 transition whitespace-nowrap" data-filter="all">Tudo</button>
+                        <button onclick="setFilter('pending')" class="filter-btn flex-1 bg-white border border-slate-200 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:border-blue-900 transition whitespace-nowrap" data-filter="pending">Abertos</button>
+                        <button onclick="setFilter('overdue')" class="filter-btn flex-1 bg-white border border-slate-200 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:border-blue-900 transition whitespace-nowrap" data-filter="overdue">Vencidos</button>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500 font-bold border-b border-slate-100">
+                                    <tr>
+                                        <th class="px-5 py-4">Cliente</th>
+                                        <th class="px-5 py-4 text-right">Valor Atual</th>
+                                        <th class="px-5 py-4 text-center">Status</th>
+                                        <th class="px-5 py-4 text-center">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="debtTableBody" class="text-sm divide-y divide-slate-50"></tbody>
+                            </table>
+                        </div>
+                        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-12 text-slate-300">
+                            <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                            <span class="text-xs font-bold uppercase tracking-widest">Sem registros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ======================================================
+        // CONFIGURAÇÃO OBRIGATÓRIA:
+        // Cole o LINK do seu Script do Google (Exec) abaixo:
+        const API_URL = "https://script.google.com/macros/s/AKfycbyOyoOyMECUAv9m9u1eU17wgGAgKVi5U7h2uvHdNTegfc6yGXueXZ1sQk81cSJqArNH7w/exec"; 
+        // Exemplo: "https://script.google.com/macros/s/AKfycbx.../exec"
+        // ======================================================
+
+        let debts = [];
+        let currentFilter = 'all';
+
+        // --- Sistema de Login ---
+        function checkLogin() {
+            const pass = document.getElementById('passwordInput').value;
+            const error = document.getElementById('errorMsg');
+            
+            // Senha definida: boldt (minúsculo)
+            if (pass === 'boldt') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('appContent').style.display = 'flex';
+                // Salva que o usuário já logou (opcional, remova se quiser pedir senha sempre)
+                localStorage.setItem('boldt_auth', 'true');
+                initSystem();
+            } else {
+                error.classList.remove('hidden');
+                document.getElementById('passwordInput').classList.add('border-red-500');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('boldt_auth');
+            location.reload();
+        }
+
+        // Verifica se já estava logado antes
+        if (localStorage.getItem('boldt_auth') === 'true') {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContent').style.display = 'flex';
+            initSystem();
+        }
+
+        // --- Sistema Principal ---
+        function initSystem() {
+            if (API_URL.includes("COLE_AQUI")) {
+                alert("ERRO: Você precisa abrir o arquivo HTML e colar o link do seu Google Script na linha indicada!");
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('payDate').value = today;
+            fetchDebts();
+        }
+
+        async function fetchDebts() {
+            showLoader(true);
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    debts = data;
+                    render();
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao conectar com a base de dados.");
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        async function saveDebt(data) {
+            showLoader(true);
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'create', data: { ...data, id: 'ID'+Date.now(), status: 'pending' } })
+                });
+                document.getElementById('debtForm').reset();
+                await fetchDebts();
+            } catch (e) { alert("Erro ao salvar"); }
+            finally { showLoader(false); }
+        }
+
+        async function toggleStatus(id, current) {
+            showLoader(true);
+            const newStatus = current === 'paid' ? 'pending' : 'paid';
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status: newStatus }) });
+                await fetchDebts();
+            } catch(e) { alert("Erro ao atualizar"); }
+            finally { showLoader(false); }
+        }
+
+        async function deleteItem(id) {
+            if(!confirm("Tem certeza?")) return;
+            showLoader(true);
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id }) });
+                await fetchDebts();
+            } catch(e) { alert("Erro ao deletar"); }
+            finally { showLoader(false); }
+        }
+
+        // --- Renderização ---
+        function calculateTotal(d) {
+            const start = new Date(d.startDate);
+            const end = new Date(d.payDate);
+            const days = Math.ceil(Math.abs(end - start) / (86400000));
+            const months = Math.max(0, days / 30);
+            const rate = parseFloat(d.rate) / 100;
+            const amt = parseFloat(d.amount);
+            return d.interestType === 'compound' ? amt * Math.pow((1 + rate), months) : amt * (1 + (rate * months));
+        }
+
+        function render() {
+            const tbody = document.getElementById('debtTableBody');
+            tbody.innerHTML = '';
+            let pTotal = 0, oTotal = 0;
+
+            const filtered = debts.filter(d => {
+                const isPaid = d.status === 'paid';
+                const isOver = !isPaid && new Date(d.payDate) < new Date();
+                
+                // Calcula totais
+                const val = calculateTotal(d);
+                if(!isPaid) { pTotal += val; if(isOver) oTotal += val; }
+
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'pending') return !isPaid;
+                if (currentFilter === 'overdue') return isOver;
+                return false;
+            });
+
+            if(filtered.length === 0) document.getElementById('emptyState').classList.remove('hidden');
+            else document.getElementById('emptyState').classList.add('hidden');
+
+            filtered.forEach(d => {
+                const total = calculateTotal(d);
+                const isPaid = d.status === 'paid';
+                const isOver = !isPaid && new Date(d.payDate) < new Date();
+                
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50 hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="px-5 py-4">
+                        <div class="font-bold text-slate-900 text-xs">${d.name}</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">${new Date(d.payDate).toLocaleDateString('pt-BR')}</div>
+                    </td>
+                    <td class="px-5 py-4 text-right font-mono text-xs font-bold ${isPaid ? 'text-slate-400 line-through' : (isOver ? 'text-red-600' : 'text-slate-900')}">
+                        ${total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}
+                    </td>
+                    <td class="px-5 py-4 text-center">
+                        <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider ${isPaid ? 'bg-slate-100 text-slate-400' : (isOver ? 'bg-red-100 text-red-700' : 'bg-blue-50 text-blue-800')}">
+                            ${isPaid ? 'Pago' : (isOver ? 'Atrasado' : 'Aberto')}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-center flex justify-center gap-2">
+                        <button onclick="toggleStatus('${d.id}', '${d.status}')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-600 transition"><i class="fa-solid fa-check"></i></button>
+                        <button onclick="deleteItem('${d.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('mobilePending').innerText = pTotal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            document.getElementById('mobileOverdue').innerText = oTotal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+        }
+
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active', 'bg-blue-50', 'text-blue-900', 'border-blue-900');
+                if(b.dataset.filter === f) b.classList.add('active', 'bg-blue-50', 'text-blue-900', 'border-blue-900');
+            });
+            render();
+        }
+        
+        function showLoader(show) { document.getElementById('globalLoader').classList.toggle('hidden', !show); }
+
+        document.getElementById('debtForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveDebt({
+                name: document.getElementById('name').value,
+                amount: document.getElementById('amount').value,
+                rate: document.getElementById('rate').value,
+                interestType: document.getElementById('interestType').value,
+                startDate: document.getElementById('startDate').value,
+                payDate: document.getElementById('payDate').value
+            });
+        });
+    </script>
+</body>
+</html>
